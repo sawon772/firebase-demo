@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Notes App</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+  h1 { text-align: center; color: #333; }
+  form { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+  input, textarea { width: 100%; padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; }
+  button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+  button:hover { background: #0056b3; }
+  .note { background: #fff; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 0 3px rgba(0,0,0,0.1); }
+</style>
+</head>
+<body>
+<h1>Student Notes App</h1>
+
+<form id="noteForm">
+  <input type="text" id="title" placeholder="Note Title" required>
+  <textarea id="description" placeholder="Note Description" required></textarea>
+  <button type="submit">Add Note</button>
+</form>
+
+<div id="notesContainer"></div>
+
+<script type="module">
+  // 🔹 Firebase SDK Import
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  // 🔹 Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
+    authDomain: "fir-849f2.firebaseapp.com",
+    projectId: "fir-849f2",
+    storageBucket: "fir-849f2.firebasestorage.app",
+    messagingSenderId: "695376931417",
+    appId: "1:695376931417:web:b108541a5a7b216cc31f48",
+    measurementId: "G-EV67721B67"
+  };
+
+  // 🔹 Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const noteForm = document.getElementById("noteForm");
+  const notesContainer = document.getElementById("notesContainer");
+
+  // Add Note
+  noteForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("title").value;
+    const description = document.getElementById("description").value;
+
+    await addDoc(collection(db, "notes"), {
+      title,
+      description,
+      timestamp: new Date()
+    });
+
+    noteForm.reset();
+    displayNotes();
+  });
+
+  // Display Notes
+  async function displayNotes() {
+    notesContainer.innerHTML = "";
+    const querySnapshot = await getDocs(collection(db, "notes"));
+    querySnapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      const noteDiv = document.createElement("div");
+      noteDiv.className = "note";
+      noteDiv.innerHTML = `
+        <strong>${data.title}</strong>
+        <p>${data.description}</p>
+        <button onclick="deleteNote('${docSnap.id}')">Delete</button>
+      `;
+      notesContainer.appendChild(noteDiv);
+    });
+  }
+
+  // Delete Note
+  window.deleteNote = async (id) => {
+    await deleteDoc(doc(db, "notes", id));
+    displayNotes();
+  }
+
+  // Initial Load
+  displayNotes();
+</script>
+</body>
+</html>
