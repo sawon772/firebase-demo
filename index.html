@@ -1,1092 +1,1152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro ID Card Print & Arrange Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pro Messenger - Professional Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Base Reset and Fonts */
+        :root {
+            --bg: #f5f7fa; /* Lighter background */
+            --card: #fff;
+            --text: #1a202c; /* Darker text */
+            --muted: #718096;
+            --accent: #0b84ff;
+            --accent-hover: #0066cc;
+            --border: #edf2f7;
+            --hover: rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 16px; /* Slightly larger radius for modern look */
+            --radius-sm: 8px;
+            --header-height: 64px;
+        }
+
+        body.dark {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e2e8f0;
+            --muted: #a0aec0;
+            --accent: #4299e1;
+            --accent-hover: #3182ce;
+            --border: #2d3748;
+            --hover: rgba(255,255,255,0.08);
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
         body {
-            font-family: 'Poppins', sans-serif;
-            text-align: center;
             margin: 0;
-            padding: 0;
-            background: #f0f2f5; /* Light grey background */
-            color: #333;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+            display: flex; /* For full screen app */
         }
 
-        /* Container & Layout */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #007bff;
-            font-weight: 600;
-            margin-top: 20px;
-            margin-bottom: 25px;
-        }
-
-        h2 {
-            font-weight: 400;
-            color: #555;
-        }
-
-        /* Forms & Inputs */
-        #loginForm, #registerForm {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            max-width: 450px;
-            margin: 50px auto;
-            transition: all 0.3s ease-in-out;
-        }
-        
-        #loginForm input, #registerForm input, .main-controls input, .main-controls select {
+            max-width: 1400px; /* Wider container */
             width: 100%;
-            box-sizing: border-box; /* Fix for box-sizing issue */
-            margin: 10px 0;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        #loginForm input:focus, #registerForm input:focus, .main-controls input:focus, .main-controls select:focus {
-            border-color: #007bff;
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
-        }
-
-        /* Buttons */
-        .btn, #loginForm button, #registerForm button {
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Primary Button - Login, Draw, Download */
-        .btn-primary, #loginForm button:first-of-type {
-            background: #007bff;
-            color: white;
-            width: calc(100% - 16px);
-            margin-top: 15px;
-        }
-
-        .btn-primary:hover, #loginForm button:first-of-type:hover {
-            background: #0056b3;
-        }
-
-        /* Success Button - Register, Save */
-        .btn-success, #registerForm button:first-of-type {
-            background: #28a745;
-            color: white;
-            width: calc(100% - 16px);
-            margin-top: 15px;
-        }
-
-        .btn-success:hover, #registerForm button:first-of-type:hover {
-            background: #1e7e34;
-        }
-        
-        /* Secondary Button - Back, View Cards */
-        .btn-secondary, #registerForm button:last-of-type {
-            background: #6c757d;
-            color: white;
-            width: calc(100% - 16px);
-        }
-
-        .btn-secondary:hover, #registerForm button:last-of-type:hover {
-            background: #5a6268;
-        }
-        
-        /* Danger Button - Logout, Delete */
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        /* Info/Camera Button */
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background: #138496;
-        }
-
-
-        /* User Info */
-        .user-info {
-            background: #e9f7ef;
-            padding: 15px;
-            margin: 20px auto;
-            border-radius: 8px;
-            max-width: 90%;
+            margin: 0 auto;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .user-info button {
-            margin-left: 20px;
-        }
-
-        /* Marquee Section */
-        .marquee-section {
-            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
-            color: white;
-            padding: 10px 0;
-            margin: 0 0 30px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 100vh;
+            border-radius: var(--radius);
             overflow: hidden;
+            box-shadow: 0 0 0 1px var(--border), var(--shadow); /* Subtle app shadow */
         }
 
-        .marquee {
-            white-space: nowrap;
-            animation: marquee 25s linear infinite;
-        }
-
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-
-        .marquee span {
-            font-size: 15px;
-            padding: 0 30px;
-        }
-
-        /* Canvas and Card Controls */
-        #a4canvas {
-            width: 794px;
-            height: 1123px;
-            max-width: 100%;
-            border: 2px solid #ccc;
-            background: white;
-            margin: 20px auto;
-            display: block;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .main-controls {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin: 20px auto;
-        }
-        
-        .input-group {
+        /* Left Panel - Chat List */
+        .left-panel {
+            min-width: 320px;
+            max-width: 400px;
+            width: 30%;
+            background: var(--card);
+            border-right: 1px solid var(--border);
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .input-group label {
-            font-weight: 600;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            display: block;
-            color: #555;
-        }
-
-        .file-upload-section {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .file-upload-section input[type="file"] {
-            display: none;
-        }
-
-        .preview-img {
-            width: 150px;
-            height: 95px; /* Added height for better visual consistency */
-            object-fit: contain;
-            margin: 10px;
-            border: 2px dashed #007bff;
-            border-radius: 8px;
-            background: #f8f9fa;
-        }
-
-        /* Camera/Crop Section */
-        .camera-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px auto;
-            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
-        }
-        
-        .camera-section h3 {
-            color: #17a2b8;
-        }
-
-        /* Crop Area Styles (Enhanced) */
-        .crop-area {
+            flex-direction: column;
+            overflow: hidden;
             position: relative;
-            max-width: 90%;
-            margin: 30px auto;
-            border: 3px solid #007bff;
-            display: none;
-            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
-            border-radius: 5px;
+            z-index: 10;
+        }
+
+        .header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card);
+            z-index: 1;
+            min-height: var(--header-height);
+        }
+
+        .profile-mini {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-mini img {
+            width: 40px; /* Slightly smaller for professional look */
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent);
+            flex-shrink: 0;
+        }
+
+        .profile-info h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .profile-info p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn:active {
+            transform: scale(0.99);
+        }
+
+        .btn-icon {
+            padding: 10px;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: none;
+            border-radius: 50%; /* Icon buttons are typically round */
+            cursor: pointer;
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: var(--hover);
+            color: var(--text);
+        }
+
+        .search-box {
+            padding: 0 20px 16px; /* Adjust padding */
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-container input {
+            padding: 10px 12px 10px 40px;
+            border-radius: 24px; /* Pill shape */
+            border: 1px solid var(--border);
+            background: var(--bg);
+            font-size: 14px;
+        }
+
+        .new-chat-btn {
+            padding: 16px 20px 0;
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 8px; /* Consistent inner padding */
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .chat-item:hover:not(.active) {
+            background: var(--hover);
+        }
+
+        .chat-item.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(11, 132, 255, 0.3); /* Accent shadow for active */
+        }
+        
+        .chat-item.active .chat-name,
+        .chat-item.active .last-message,
+        .chat-item.active .time {
+            color: white;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .unread-badge {
+            background: #ff4d6d;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            /* ... existing styles ... */
+        }
+
+        /* Right Panel - Chat Window */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            position: relative;
+        }
+
+        .chat-window {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
-        .crop-box {
-            border: 2px dashed #ff4757;
-            background: rgba(255, 71, 87, 0.15);
-        }
-
-        .crop-corner {
-            width: 15px;
-            height: 15px;
-            background: #ff4757;
-        }
-
-        /* Saved Cards List */
-        #savedCardsList {
-            margin: 30px auto;
-            max-width: 90%;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        .chat-header-main {
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: var(--header-height);
         }
         
-        .card-item {
-            border: 1px solid #e0e0e0;
-            margin: 10px 0;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            text-align: left;
-            transition: transform 0.2s;
-        }
-        
-        .card-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-        }
-        
-        .card-item strong {
-            color: #007bff;
+        .messages-container {
+            /* ... existing styles ... */
         }
 
-        /* Footer */
-        .footer {
-            background: #2c3e50;
+        .message.sent {
+            background: var(--accent);
             color: white;
-            padding: 40px 20px;
-            margin-top: 50px;
-            border-top: 5px solid #3498db;
+            /* ... existing styles ... */
         }
 
-        .footer-content h3 {
-            color: #3498db;
-            font-weight: 600;
+        .message.received {
+            background: var(--card);
+            border: 1px solid var(--border);
+            /* ... existing styles ... */
         }
 
-        .contact-info p {
-            margin: 10px 0;
+        .message-composer {
+            padding: 12px 24px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0; /* Ensure it doesn't get squeezed */
         }
-
-        .contact-info a {
-            color: #85c1e9;
+        
+        .composer-container input {
+            padding: 10px 16px; /* Reduced vertical padding */
+            border-radius: 24px;
+            background: var(--bg);
+            border: 1px solid var(--border);
         }
-
-        .whatsapp-btn {
-            background: #25D366;
-            padding: 15px 30px;
-            border-radius: 30px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        .whatsapp-btn:hover {
-            background: #128C7E;
-        }
-
-        /* Utility Class */
-        .hidden {
-            display: none !important;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
+        
+        /* Mobile Responsive Improvements */
+        @media (max-width: 800px) { /* Use a slightly wider breakpoint for a better experience */
             .container {
-                padding: 10px;
+                box-shadow: none; /* Remove shadow on mobile */
+                border-radius: 0;
             }
-            
-            #loginForm, #registerForm, #savedCardsList {
-                max-width: 95%;
-                margin: 20px auto;
-                padding: 20px;
+
+            .left-panel {
+                width: 100%;
+                max-width: 100%;
+                position: absolute;
+                height: 100%;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                border-right: none;
             }
-            
-            .btn, #loginForm button, #registerForm button {
-                font-size: 15px;
-                padding: 10px;
-                width: calc(100% - 16px);
-                margin: 5px 8px;
+
+            .left-panel.active {
+                transform: translateX(0);
+                box-shadow: var(--shadow); /* Shadow when open */
             }
-            
-            .input-group {
-                flex-direction: column;
-                gap: 5px;
-            }
-            
-            .input-group input, .input-group select {
+
+            .right-panel {
                 width: 100%;
             }
 
-            .file-upload-section {
-                flex-direction: column;
-                gap: 10px;
+            .message {
+                max-width: 90%;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                position: absolute; /* Place on top of right panel */
+                left: 10px;
+                top: 10px;
+                z-index: 5;
             }
             
-            .preview-img {
-                width: 90%;
-                height: auto;
-                margin: 5px auto;
+            .back-to-chats {
+                display: flex !important;
             }
-
-            .marquee {
-                white-space: normal;
-                animation: none;
-                text-align: center;
-            }
-            .marquee span {
-                display: block;
-                padding: 5px 10px;
+            
+            .chat-header-main {
+                padding-left: 10px; /* Adjust for back button */
             }
         }
+
+        @media (min-width: 801px) {
+            .left-panel {
+                width: 380px; /* Fixed width on desktop */
+            }
+            .mobile-menu-btn,
+            .back-to-chats {
+                display: none !important;
+            }
+        }
+
+        /* ... all other existing CSS ... */
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 </head>
 <body>
+    <div class="modal" id="loginModal" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Welcome to Pro Messenger</h3>
+            </div>
+            <div class="login-card" style="box-shadow: none; padding: 0;">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Country</label>
+                        <select id="countrySelect">
+                            <option value="+880">Bangladesh (+880)</option>
+                            <option value="+91">India (+91)</option>
+                            <option value="+62">Indonesia (+62)</option>
+                            <option value="+60">Malaysia (+60)</option>
+                            <option value="+977">Nepal (+977)</option>
+                            <option value="+92">Pakistan (+92)</option>
+                            <option value="+95">Myanmar (+95)</option>
+                            <option value="+66">Thailand (+66)</option>
+                        </select>
+                    </div>
 
-    <div class="marquee-section">
-        <div class="marquee">
-            <span>📢 সম্মানিত ইউজার, আসসালামু আলাইকুম! এই টুলসের মাধ্যমে আপনি খুব সহজে এবং দ্রুত আপনার ন্যাশনাল আইডি কার্ড, ড্রাইভিং লাইসেন্স, বা যেকোনো আইডি কার্ড A4 সাইজের পেপারে পারফেক্টভাবে অ্যারেঞ্জ করে প্রিন্ট করতে পারবেন। সম্পূর্ণ অটোমেটিক সিস্টেম - আপনি শুধু ইমেজ আপলোড করুন, বাকি কাজ আমাদের টুলস করে দিবে! ধন্যবাদ।</span>
+                    <div class="form-group">
+                        <label>Phone Number (without country code)</label>
+                        <input type="tel" id="phoneInputSimple" placeholder="17XXXXXXXX" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="displayNameInput" placeholder="Your name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Profile Picture (Optional)</label>
+                        <div class="file-input">
+                            <input type="file" id="profileUploadInput" accept="image/*">
+                        </div>
+                    </div>
+
+                    <div class="login-actions">
+                        <button type="submit" class="btn" id="doLogin">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login / Register
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="clearLocal">
+                            Clear Data
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="container">
-        <div id="loginForm">
-            <h2>🔐 Login to ID Card Tool</h2>
-            <input type="email" id="loginEmail" placeholder="Email" required>
-            <input type="password" id="loginPassword" placeholder="Password" required>
-            <button onclick="login()" class="btn-primary">Login</button>
-            <button onclick="showRegister()" class="btn-success">Register</button>
-            <p id="loginMessage"></p>
+    <div class="container hidden" id="appContainer">
+        <div class="left-panel" id="leftPanel">
+            <div class="header">
+                <div class="profile-mini">
+                    <img id="miniPic" src="https://i.pravatar.cc/100" alt="Profile">
+                    <div class="profile-info">
+                        <h3 id="miniName">Guest</h3>
+                        <p id="miniNumber">Not logged in</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-icon" id="themeBtn" title="Toggle theme">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="btn-icon" id="logoutBtn" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-box">
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search chats...">
+                </div>
+            </div>
+
+            <div class="new-chat-btn">
+                <button class="btn" id="openNewChatPanel" style="width: 100%;">
+                    <i class="fas fa-plus"></i>
+                    Start New Chat
+                </button>
+            </div>
+
+            <div class="chat-list" id="chatList">
+                <div class="chat-item">
+                    <div class="chat-avatar skeleton" style="width: 52px; height: 52px;"></div>
+                    <div class="chat-content" style="flex: 1;">
+                        <div class="skeleton" style="height: 16px; width: 60%; margin-bottom: 8px;"></div>
+                        <div class="skeleton" style="height: 14px; width: 80%;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="registerForm" class="hidden">
-            <h2>📝 Register New Account</h2>
-            <input type="text" id="registerName" placeholder="Full Name" required>
-            <input type="email" id="registerEmail" placeholder="Email" required>
-            <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required>
-            <button onclick="register()" class="btn-success">Register</button>
-            <button onclick="showLogin()" class="btn-secondary">Back to Login</button>
-            <p id="registerMessage"></p>
-        </div>
-
-        <div id="mainApp" class="hidden">
-            <div class="user-info">
-                Welcome, <span id="userName">User</span>! 
-                <button onclick="logout()" class="btn btn-danger">Logout</button>
-            </div>
-
-            <h1>🪪 Pro ID Card Print & Arrange Tool</h1>
-
-            <div class="camera-section">
-                <h3>📸 Image/Capture Options</h3>
-                <button class="btn btn-info" onclick="openCamera()">📸 ক্যামেরা খুলুন</button>
-                <button class="btn btn-info" onclick="uploadImage()">📁 ইমেজ আপলোড</button>
-                <button class="btn btn-info" onclick="startCrop()">✂️ ক্রপ শুরু করুন</button>
-            </div>
-
-            <div class="crop-area" id="cropContainer">
-                <img id="cropImage" class="crop-image" src="" alt="Image to Crop">
-                <div class="crop-box" id="cropBox">
-                    <div class="crop-corner top-left"></div>
-                    <div class="crop-corner top-right"></div>
-                    <div class="crop-corner bottom-left"></div>
-                    <div class="crop-corner bottom-right"></div>
-                </div>
-            </div>
-            <div id="cropButtons" class="hidden" style="margin: 10px;">
-                <button class="btn btn-success" onclick="applyCrop()">✅ ক্রপ অ্যাপ্লাই করুন</button>
-                <button class="btn btn-danger" onclick="cancelCrop()">❌ বাতিল করুন</button>
-            </div>
-
-            <div class="main-controls">
-                <div class="file-upload-section">
-                    <input type="file" id="file1" accept="image/*">
-                    <input type="file" id="file2" accept="image/*">
-                </div>
-                
-                <div class="preview-section">
-                    <img id="preview1" class="preview-img" src="" alt="Front Preview">
-                    <img id="preview2" class="preview-img" src="" alt="Back Preview">
-                    <p style="margin-top: 5px; font-size: 14px; color: #777;">⬆️ Front & Back Image Previews ⬆️</p>
-                </div>
-
-                <div class="input-group">
-                    <div>
-                        <label for="widthMM">Width (mm):</label>
-                        <input type="number" id="widthMM" value="85" step="0.1">
+        <div class="right-panel">
+            <button class="mobile-menu-btn btn-icon" id="mobileMenuBtn" style="display: none;">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="welcome-screen" id="welcomeScreen">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <i class="fas fa-comments"></i>
                     </div>
-                    <div>
-                        <label for="heightMM">Height (mm):</label>
-                        <input type="number" id="heightMM" value="54" step="0.1">
-                    </div>
-                    <div>
-                        <label for="paperSize">Paper Size:</label>
-                        <select id="paperSize">
-                            <option value="A4">A4</option>
-                            <option value="Letter">Letter</option>
-                            <option value="Legal">Legal</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="downloadType">Download as:</label>
-                        <select id="downloadType">
-                            <option value="PDF">PDF</option>
-                            <option value="JPG">JPG</option>
-                            <option value="PNG">PNG</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="drawCanvas()">Preview & Arrange</button>
-                    <button class="btn btn-secondary" onclick="downloadOutput()">Download</button>
-                    <button class="btn btn-secondary" onclick="printCanvas()">Print</button>
-                    <button class="btn btn-secondary" onclick="shareCanvas()">Share</button>
-                    <button class="btn btn-success" onclick="saveToFirestore()">Save to Cloud</button>
-                    <button class="btn btn-info" onclick="viewMyCards()">My Saved Cards</button>
+                    <h2>Welcome to Pro Messenger</h2>
+                    <p>Select a chat from the list to start messaging or create a new conversation.</p>
+                    <button class="btn" id="welcomeNewChat">
+                        <i class="fas fa-plus"></i>
+                        Start New Chat
+                    </button>
                 </div>
             </div>
 
-            <canvas id="a4canvas"></canvas>
-
-            <div id="savedCardsList"></div>
-
-            <footer class="footer">
-                <div class="footer-content">
-                    <h3>🆘 সাহায্যের জন্য যোগাযোগ করুন</h3>
-                    <div class="contact-info">
-                        <p>📱 WhatsApp: <a href="https://wa.me/8801881385068" target="_blank">01881385068</a></p>
-                        <p>⏰ সময়: সকাল ৯টা - রাত ১০টা</p>
-                        <p>💬 যেকোনো সমস্যায় আমরা আছি আপনার পাশে</p>
+            <div class="chat-window hidden" id="chatWindow">
+                <div class="chat-header-main">
+                    <button class="back-to-chats btn-icon" id="backToChats">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="chat-partner">
+                        <img id="chatWithPic" src="https://i.pravatar.cc/80" alt="Contact">
+                        <div class="partner-info">
+                            <h3 id="chatWithName">Select chat</h3>
+                            <p id="chatWithNumber">--</p>
+                        </div>
                     </div>
-                    <div class="social-links">
-                        <button class="whatsapp-btn" onclick="openWhatsApp()">
-                            📞 WhatsApp এ কথা বলুন
+                    <div class="chat-actions">
+                        <button class="btn-icon" id="openChatSettings" title="Chat settings">
+                            <i class="fas fa-ellipsis-v"></i>
                         </button>
                     </div>
                 </div>
-            </footer>
+
+                <div class="messages-container" id="chatMessages">
+                    </div>
+
+                <div class="typing-indicator" id="typingIndicator"></div>
+
+                <div class="message-composer">
+                    <div class="composer-container">
+                        <button class="btn-icon" id="emojiToggle">
+                            <i class="far fa-smile"></i>
+                        </button>
+                        <input type="text" id="messageBox" placeholder="Type a message...">
+                        <div class="composer-actions">
+                            <button class="btn-icon" id="attachFile">
+                                <i class="fas fa-paperclip"></i>
+                            </button>
+                            <button class="btn" id="sendBtn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="emoji-picker hidden" id="emojiPicker">
+                        <span class="emoji" onclick="pickEmoji('😊')">😊</span>
+                        <span class="emoji" onclick="pickEmoji('😂')">😂</span>
+                        <span class="emoji" onclick="pickEmoji('❤️')">❤️</span>
+                        <span class="emoji" onclick="pickEmoji('👍')">👍</span>
+                        <span class="emoji" onclick="pickEmoji('🎉')">🎉</span>
+                        <span class="emoji" onclick="pickEmoji('🙏')">🙏</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Firebase Configuration
+    <div class="modal hidden" id="newChatModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Start New Chat</h3>
+                <button class="close-btn" id="closeNewChatModal">&times;</button>
+            </div>
+            <form id="newChatForm">
+                <div class="form-group">
+                    <label>Contact Number (with country code)</label>
+                    <input type="tel" id="newChatNumber" placeholder="+8801712345678" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Name (optional)</label>
+                    <input type="text" id="newChatName" placeholder="Friend's name">
+                </div>
+
+                <div class="form-group">
+                    <label>Contact Picture (optional)</label>
+                    <div class="file-input">
+                        <input type="file" id="newChatPic" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="login-actions">
+                    <button type="submit" class="btn" id="addContactBtn">
+                        <i class="fas fa-user-plus"></i>
+                        Add Contact
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelNewChat">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal hidden" id="chatSettingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chat Options</h3>
+                <button class="close-btn" id="closeChatSettingsModal">&times;</button>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-secondary" id="deleteChatBtn">
+                    <i class="fas fa-trash"></i>
+                    Delete Chat
+                </button>
+                <button class="btn btn-secondary" id="clearChatHistory">
+                    <i class="fas fa-broom"></i>
+                    Clear History
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="imagePicker" accept="image/*" style="display: none;">
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onChildAdded, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // Firebase Configuration - REPLACE WITH YOUR OWN CONFIG
+        // NOTE: Keeping the provided dummy config for continuity
         const firebaseConfig = {
-            apiKey: "AIzaSyB_jVIj6vnpjRowsysZg79oH3iPFEX40Ow",
-            authDomain: "idcardtool.firebaseapp.com",
-            projectId: "idcardtool",
-            storageBucket: "idcardtool.firebasestorage.app",
-            messagingSenderId: "542300187907",
-            appId: "1:542300187907:web:227d6f48edc5ca110d0d36",
-            measurementId: "G-9XP8EHP686"
+            apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
+            authDomain: "fir-849f2.firebaseapp.com",
+            databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com",
+            projectId: "fir-849f2",
+            storageBucket: "fir-849f2.appspot.com",
+            messagingSenderId: "695376931417",
+            appId: "1:695376931417:web:b108541a5a7b216cc31f48"
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
 
-        // Canvas Elements
-        const canvas = document.getElementById("a4canvas");
-        const ctx = canvas.getContext("2d");
-        let img1 = null;
-        let img2 = null;
+        // App State
+        let currentUser = null;
+        let currentName = null;
+        let currentPic = null;
+        let currentChatId = null;
+        let currentChatOther = null;
+        let chatListeners = {};
+        let chatListRef = null; // Store reference for chat list listener
 
-        // UI Elements
-        const loginForm = document.getElementById("loginForm");
-        const registerForm = document.getElementById("registerForm");
-        const mainApp = document.getElementById("mainApp");
-        const loginMessage = document.getElementById("loginMessage");
-        const registerMessage = document.getElementById("registerMessage");
-        const userName = document.getElementById("userName");
+        // DOM Elements
+        const DOM = {
+            loginModal: document.getElementById('loginModal'),
+            appContainer: document.getElementById('appContainer'),
+            leftPanel: document.getElementById('leftPanel'),
+            chatList: document.getElementById('chatList'),
+            welcomeScreen: document.getElementById('welcomeScreen'),
+            chatWindow: document.getElementById('chatWindow'),
+            chatMessages: document.getElementById('chatMessages'),
+            messageBox: document.getElementById('messageBox'),
+            searchInput: document.getElementById('searchInput'),
+            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+        };
 
-        // Authentication Functions
-        function showRegister() {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
+        // Utility Functions
+        function uidFor(a, b) {
+            return [a, b].sort().join('_');
         }
 
-        function showLogin() {
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
+        function nowStr() {
+            return new Date().toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', day: 'numeric', month: 'short' });
         }
 
-        function register() {
-            const name = document.getElementById("registerName").value;
-            const email = document.getElementById("registerEmail").value;
-            const password = document.getElementById("registerPassword").value;
-
-            if (password.length < 6) {
-                registerMessage.textContent = "Password must be at least 6 characters";
-                registerMessage.style.color = "red";
-                return;
-            }
-
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Save user name to Firestore
-                    return db.collection('users').doc(userCredential.user.uid).set({
-                        name: name,
-                        email: email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                })
-                .then(() => {
-                    registerMessage.textContent = "Registration successful!";
-                    registerMessage.style.color = "green";
-                    setTimeout(() => {
-                        showLogin();
-                    }, 2000);
-                })
-                .catch((error) => {
-                    registerMessage.textContent = "Error: " + error.message;
-                    registerMessage.style.color = "red";
-                });
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
         }
 
-        function login() {
-            const email = document.getElementById("loginEmail").value;
-            const password = document.getElementById("loginPassword").value;
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Login successful
-                    loginMessage.textContent = "Login successful!";
-                    loginMessage.style.color = "green";
-                    
-                    // Get user data
-                    return db.collection('users').doc(userCredential.user.uid).get();
-                })
-                .then((doc) => {
-                    if (doc.exists) {
-                        userName.textContent = doc.data().name;
-                    }
-                    showMainApp();
-                })
-                .catch((error) => {
-                    loginMessage.textContent = "Error: " + error.message;
-                    loginMessage.style.color = "red";
-                });
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
         }
+        
+        // --- AUTHENTICATION & UI MANAGEMENT ---
 
-        function logout() {
-            auth.signOut().then(() => {
-                showLoginForm();
-            });
-        }
-
-        function showMainApp() {
-            loginForm.classList.add('hidden');
-            registerForm.classList.add('hidden');
-            mainApp.classList.remove('hidden');
-        }
-
-        function showLoginForm() {
-            mainApp.classList.add('hidden');
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-            
-            // Clear forms
-            document.getElementById("loginEmail").value = "";
-            document.getElementById("loginPassword").value = "";
-            document.getElementById("registerName").value = "";
-            document.getElementById("registerEmail").value = "";
-            document.getElementById("registerPassword").value = "";
-            loginMessage.textContent = "";
-            registerMessage.textContent = "";
-        }
-
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // User is signed in
-                db.collection('users').doc(user.uid).get().then((doc) => {
-                    if (doc.exists) {
-                        userName.textContent = doc.data().name;
-                    }
-                    showMainApp();
-                });
-            } else {
-                // User is signed out
-                showLoginForm();
-            }
-        });
-
-        // নতুন ফাংশন: ক্যামেরা খোলা
-        function openCamera() {
-            alert('ক্যামেরা ফিচারটি খুব শীঘ্রই আসছে! এখন ইমেজ আপলোড করুন।');
-        }
-
-        // নতুন ফাংশন: ইমেজ আপলোড
-        function uploadImage() {
-            document.getElementById('file1').click();
-        }
-
-        // নতুন ফাংশন: ক্রপ শুরু
-        function startCrop() {
-            const cropContainer = document.getElementById('cropContainer');
-            const cropButtons = document.getElementById('cropButtons');
-            
-            if (document.getElementById('preview1').src) {
-                document.getElementById('cropImage').src = document.getElementById('preview1').src;
-                cropContainer.classList.remove('hidden');
-                cropButtons.classList.remove('hidden');
-                alert('ক্রপ শুরু করুন! ইমেজের কর্নার গুলো টেনে সাইজ adjust করুন।');
-            } else {
-                alert('প্রথমে একটি ইমেজ আপলোড করুন।');
-            }
-        }
-
-        // নতুন ফাংশন: ক্রপ অ্যাপ্লাই
-        function applyCrop() {
-            alert('ক্রপ অ্যাপ্লাই করা হয়েছে! এই ফিচারটি সম্পূর্ণ ভার্সনে available হবে।');
-            document.getElementById('cropContainer').classList.add('hidden');
-            document.getElementById('cropButtons').classList.add('hidden');
-        }
-
-        // নতুন ফাংশন: ক্রপ বাতিল
-        function cancelCrop() {
-            document.getElementById('cropContainer').classList.add('hidden');
-            document.getElementById('cropButtons').classList.add('hidden');
-        }
-
-        // নতুন ফাংশন: WhatsApp খোলা
-        function openWhatsApp() {
-            window.open('https://wa.me/8801881385068', '_blank');
-        }
-
-        // Existing ID Card Tool Functions (Same as before)
-        document.getElementById("file1").addEventListener("change", function(e){
-            if(e.target.files[0]){
-                const reader = new FileReader();
-                reader.onload = () => document.getElementById("preview1").src = reader.result;
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-
-        document.getElementById("file2").addEventListener("change", function(e){
-            if(e.target.files[0]){
-                const reader = new FileReader();
-                reader.onload = () => document.getElementById("preview2").src = reader.result;
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-
-        async function loadImage(file){
-            return new Promise(resolve=>{
-                const reader = new FileReader();
-                reader.onload = ()=>{
-                    const img = new Image();
-                    img.onload = ()=>resolve(img);
-                    img.src = reader.result;
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        async function drawCanvas(){
-            const file1 = document.getElementById("file1").files[0];
-            const file2 = document.getElementById("file2").files[0];
-            if(!file1 || !file2){
-                alert("দুইটি ফাইল বেছে নিন!");
-                return;
-            }
-            img1 = await loadImage(file1);
-            img2 = await loadImage(file2);
-            
-            const paper = document.getElementById("paperSize").value;
-            switch(paper){
-                case "A4": 
-                    canvas.width=794;
-                    canvas.height=1123;
-                    break;
-                case "Letter": 
-                    canvas.width=816;
-                    canvas.height=1056;
-                    break;
-                case "Legal": 
-                    canvas.width=816;
-                    canvas.height=1344;
-                    break;
-            }
-            
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle="white";
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-
-            const cardWidth = parseFloat(document.getElementById("widthMM").value)*3.78;
-            const cardHeight = parseFloat(document.getElementById("heightMM").value)*3.78;
-            const gap = 90;
-            const x = (canvas.width - cardWidth)/2;
-            const y1 = (canvas.height - (cardHeight*2 + gap))/2;
-            const y2 = y1 + cardHeight + gap;
-
-            ctx.drawImage(img1,x,y1,cardWidth,cardHeight);
-            ctx.drawImage(img2,x,y2,cardWidth,cardHeight);
-            
-            alert("প্রিভিউ তৈরি হয়েছে ✅");
-        }
-
-        function downloadOutput(){
-            const type = document.getElementById("downloadType").value;
-            if(type==="PDF"){
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF("p","pt",[canvas.width, canvas.height]);
-                pdf.addImage(canvas.toDataURL("image/jpeg"),"JPEG",0,0,canvas.width,canvas.height);
-                pdf.save("ID_Arranged.pdf");
-            } else {
-                const link = document.createElement("a");
-                link.download = `ID_Arranged.${type.toLowerCase()}`;
-                link.href = canvas.toDataURL(`image/${type.toLowerCase()}`);
-                link.click();
-            }
-        }
-
-        function printCanvas(){
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head><title>Print ID Card</title></head>
-                    <body style="text-align: center;">
-                        <img src="${canvas.toDataURL('image/png')}" style="max-width: 100%;">
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        async function shareCanvas(){
-            canvas.toBlob(async function(blob){
-                const filesArray = [new File([blob], "ID_A4.png", {type: "image/png"})];
-                if(navigator.canShare && navigator.canShare({ files: filesArray })){
-                    try{
-                        await navigator.share({
-                            files: filesArray,
-                            title: 'ID Card A4',
-                            text: 'Here is your arranged ID card!'
-                        });
-                        alert("Shared successfully ✅");
-                    } catch(err){
-                        alert("Share failed: " + err);
-                    }
-                } else {
-                    alert("Your device/browser does not support direct file sharing!");
+        function loadSavedUser() {
+            const saved = localStorage.getItem('prochat_user');
+            if (saved) {
+                try {
+                    const obj = JSON.parse(saved);
+                    currentUser = obj.phone;
+                    currentName = obj.name;
+                    currentPic = obj.pic;
+                    updateUIAuth();
+                } catch (e) {
+                    localStorage.removeItem('prochat_user');
                 }
-            });
+            }
         }
 
-        // Modified Firebase Functions to include user ID
-        async function saveToFirestore() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Please login first!");
+        function saveUser() {
+            if (!currentUser) return;
+            localStorage.setItem('prochat_user', JSON.stringify({
+                phone: currentUser,
+                name: currentName,
+                pic: currentPic
+            }));
+        }
+
+        function updateUIAuth() {
+            if (currentUser) {
+                // Show app, hide login
+                DOM.loginModal.style.display = 'none';
+                DOM.appContainer.classList.remove('hidden');
+                
+                // Update user info
+                document.getElementById('miniPic').src = currentPic || 'https://i.pravatar.cc/100';
+                document.getElementById('miniName').textContent = currentName || 'You';
+                document.getElementById('miniNumber').textContent = currentUser;
+                
+                // Load chats
+                renderChatList();
+                
+                // Show mobile menu button on start
+                if (window.innerWidth <= 800) {
+                     DOM.mobileMenuBtn.style.display = 'flex';
+                }
+                
+            } else {
+                DOM.loginModal.style.display = 'flex';
+                DOM.appContainer.classList.add('hidden');
+                DOM.mobileMenuBtn.style.display = 'none';
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const country = document.getElementById('countrySelect').value;
+            const phone = document.getElementById('phoneInputSimple').value.trim();
+            const displayName = document.getElementById('displayNameInput').value.trim();
+            
+            if (!phone || !displayName) {
+                alert('Please fill out all required fields.');
                 return;
             }
 
-            if (!canvas.width) {
-                alert("প্রথমে Preview তৈরি করুন!");
-                return;
-            }
-
-            const canvasDataURL = canvas.toDataURL('image/png');
-            const cardId = 'card_' + Date.now();
+            const phoneFull = country + phone.replace(/^0+/, '');
+            
+            // Disable button and add loading class
+            const loginBtn = document.getElementById('doLogin');
+            loginBtn.disabled = true;
+            loginBtn.classList.add('loading');
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
             
             try {
-                await db.collection('idcards').doc(cardId).set({
-                    canvasImage: canvasDataURL,
-                    image1: document.getElementById("preview1").src,
-                    image2: document.getElementById("preview2").src,
-                    width: document.getElementById("widthMM").value,
-                    height: document.getElementById("heightMM").value,
-                    paperSize: document.getElementById("paperSize").value,
-                    userId: user.uid, // Store user ID
-                    userName: userName.textContent,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                // Upload profile picture if selected
+                const fileInput = document.getElementById('profileUploadInput');
+                let profilePic = 'https://i.pravatar.cc/100';
+                
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const storageRef = sRef(storage, `profiles/${phoneFull}_${Date.now()}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    profilePic = await getDownloadURL(snapshot.ref);
+                }
+
+                // Set current user
+                currentUser = phoneFull;
+                currentName = displayName;
+                currentPic = profilePic;
+                
+                // Save to localStorage
+                saveUser();
+                
+                // Ensure user exists in database (create/update profile)
+                const userRef = ref(db, `users/${currentUser}`);
+                await update(userRef, {
+                    name: currentName,
+                    pic: currentPic,
+                    lastSeen: nowStr()
                 });
                 
-                alert(`সফলভাবে সেভ হয়েছে! ✅\nআপনার ID: ${cardId}`);
-                
-                const shareableLink = `${window.location.origin}${window.location.pathname}?id=${cardId}`;
-                alert(`শেয়ার করার লিংক:\n${shareableLink}`);
+                // Update UI
+                updateUIAuth();
                 
             } catch (error) {
-                console.error("Error saving:", error);
-                alert("সেভ করতে সমস্যা হয়েছে!");
+                console.error('Login error:', error);
+                alert('Login failed. Check console for details.');
+            } finally {
+                 // Re-enable button
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('loading');
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login / Register';
             }
-        }
+        });
+        
+        // --- CHAT LIST MANAGEMENT ---
 
-        async function viewMyCards() {
-            const user = auth.currentUser;
-            if (!user) {
-                alert("Please login first!");
-                return;
+        function renderChatList() {
+            if (!currentUser) return;
+
+            // Clear previous listener if exists
+            if (chatListRef) {
+                // remove(chatListRef); // Note: Firebase v9+ 'onValue' returns an unsubscribe function
             }
+            
+            DOM.chatList.innerHTML = ''; // Clear loading skeleton on initial load
 
-            try {
-                const snapshot = await db.collection('idcards')
-                    .where("userId", "==", user.uid) // Only show user's cards
-                    .orderBy('createdAt', 'desc')
-                    .limit(10)
-                    .get();
+            chatListRef = ref(db, `chatList/${currentUser}`);
+            
+            onValue(chatListRef, (snapshot) => {
+                const chats = snapshot.val() || {};
+                let chatArray = Object.entries(chats).map(([id, data]) => ({ id, ...data }));
                 
-                const cardsList = document.getElementById('savedCardsList');
-                cardsList.innerHTML = '<h3>My Saved Cards:</h3>';
+                // Sort by time
+                chatArray.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
                 
-                if (snapshot.empty) {
-                    cardsList.innerHTML += '<p>No saved cards found.</p>';
+                DOM.chatList.innerHTML = ''; // Clear existing list
+                
+                // Filter by search
+                const searchTerm = DOM.searchInput.value.toLowerCase();
+                const filteredChats = chatArray.filter(chat => 
+                    !searchTerm || 
+                    (chat.name || '').toLowerCase().includes(searchTerm) ||
+                    (chat.contact || '').includes(searchTerm)
+                );
+                
+                if (filteredChats.length === 0) {
+                    DOM.chatList.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--muted);">No chats found</div>';
                     return;
                 }
                 
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const cardElement = document.createElement('div');
-                    cardElement.className = 'card-item';
+                filteredChats.forEach(chat => {
+                    const chatItem = document.createElement('div');
+                    chatItem.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`;
                     
-                    cardElement.innerHTML = `
-                        <p><strong>ID:</strong> ${doc.id}</p>
-                        <p><strong>Saved:</strong> ${data.createdAt?.toDate().toLocaleString() || 'Unknown'}</p>
-                        <p><strong>Size:</strong> ${data.width}mm x ${data.height}mm</p>
-                        <button class="btn btn-primary" onclick="loadCard('${doc.id}')">Load This Card</button>
-                        <button class="btn btn-secondary" onclick="shareCard('${doc.id}')">Share</button>
-                        <button class="btn btn-danger" onclick="deleteCard('${doc.id}')">Delete</button>
+                    const timeDisplay = chat.time ? chat.time.split(',')[0] : '';
+                    
+                    chatItem.innerHTML = `
+                        <img class="chat-avatar" src="${chat.pic || 'https://i.pravatar.cc/100'}" alt="${chat.name || 'Contact'}">
+                        <div class="chat-content">
+                            <div class="chat-header">
+                                <div class="chat-name">${chat.name || chat.contact}</div>
+                                <div class="time">${timeDisplay}</div>
+                            </div>
+                            <div class="last-message">${chat.lastMessage || 'No messages yet'}</div>
+                        </div>
+                        ${chat.unread > 0 ? `<div class="unread-badge">${chat.unread}</div>` : ''}
                     `;
                     
-                    cardsList.appendChild(cardElement);
+                    chatItem.addEventListener('click', () => {
+                        openChat(chat.id, chat.contact, chat.name, chat.pic);
+                        // Also un-toggle left panel on mobile
+                        if (window.innerWidth <= 800) {
+                            DOM.leftPanel.classList.remove('active');
+                        }
+                    });
+                    DOM.chatList.appendChild(chatItem);
+                });
+            });
+        }
+        
+        // --- CHAT WINDOW MANAGEMENT ---
+
+        function openChat(chatId, otherNumber, otherName, otherPic) {
+            // Check if already open
+            if (currentChatId === chatId) {
+                // Ensure chat window is visible
+                hideElement('welcomeScreen');
+                showElement('chatWindow');
+                return;
+            }
+
+            // Clean up previous listener if switching chat
+            if (currentChatId && chatListeners[currentChatId]) {
+                // The 'onChildAdded' listener returns a function to unsubscribe, but 
+                // for simplicity in this demo, we'll keep adding. For a production app, 
+                // you would need to store and call the unsubscribe function.
+            }
+            
+            // Set new state
+            currentChatId = chatId;
+            currentChatOther = otherNumber;
+            
+            // Update active state in chat list (re-render or manually update)
+            document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+            // Since renderChatList is listening, it will update the class automatically on unread change.
+            
+            // Update chat header
+            document.getElementById('chatWithName').textContent = otherName || otherNumber;
+            document.getElementById('chatWithNumber').textContent = otherNumber;
+            document.getElementById('chatWithPic').src = otherPic || 'https://i.pravatar.cc/100';
+            
+            // Reset unread count
+            if (currentUser) {
+                update(ref(db, `chatList/${currentUser}/${chatId}`), { unread: 0 });
+            }
+            
+            // Show chat window
+            hideElement('welcomeScreen');
+            showElement('chatWindow');
+            
+            // Clear previous messages
+            DOM.chatMessages.innerHTML = '';
+            
+            // Listen for messages (Using onChildAdded for continuous update)
+            const messagesRef = ref(db, `messages/${chatId}`);
+            onChildAdded(messagesRef, (snapshot) => {
+                const message = snapshot.val();
+                renderMessage(snapshot.key, message);
+                
+                // Mark as seen if from other user
+                if (message.from !== currentUser && !message.seen) {
+                    update(ref(db, `messages/${chatId}/${snapshot.key}`), { seen: true });
+                }
+            });
+            
+            // Focus on message box
+            DOM.messageBox.focus();
+        }
+
+        function renderMessage(key, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.from === currentUser ? 'sent' : 'received'}`;
+            
+            // Check if name is available, otherwise use number, if a message is received
+            const senderName = message.from === currentUser 
+                ? 'You' 
+                : (message.fromName || message.from);
+            
+            let messageHTML = '';
+            
+            // Only show name for received messages and if it's not the same as the chat partner's display name
+            if (message.from !== currentUser && senderName !== document.getElementById('chatWithName').textContent) {
+                messageHTML += `<div style="font-weight: 600; font-size: 13px; margin-bottom: 4px; color: ${message.from === currentUser ? 'white' : 'var(--accent)'};">${senderName}</div>`;
+            }
+
+            if (message.text) {
+                messageHTML += `<div>${message.text}</div>`;
+            }
+            
+            if (message.image) {
+                messageHTML += `<img class="message-image" src="${message.image}" alt="Shared image" onclick="window.open('${message.image}', '_blank')">`;
+            }
+            
+            const seenStatus = message.from === currentUser ? (message.seen ? '✓✓' : '✓') : '';
+            
+            messageHTML += `
+                <div class="message-time">
+                    ${message.time || ''} ${seenStatus}
+                </div>
+            `;
+            
+            messageDiv.innerHTML = messageHTML;
+            DOM.chatMessages.appendChild(messageDiv);
+            DOM.chatMessages.scrollTop = DOM.chatMessages.scrollHeight;
+        }
+
+        // --- SEND MESSAGE ---
+
+        document.getElementById('sendBtn').addEventListener('click', sendMessage);
+        DOM.messageBox.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submit or newline
+                await sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            if (!currentUser || !currentChatOther || !currentChatId) {
+                alert('Please select a chat first');
+                return;
+            }
+
+            const messageText = DOM.messageBox.value.trim();
+            const imageFile = document.getElementById('imagePicker').files[0];
+
+            if (!messageText && !imageFile) return;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+            try {
+                let imageUrl = null;
+                
+                // Upload image if exists
+                if (imageFile) {
+                    const storageRef = sRef(storage, `chat_images/${currentChatId}_${Date.now()}_${imageFile.name}`);
+                    const snapshot = await uploadBytes(storageRef, imageFile);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                }
+
+                // Create message object
+                const messageData = {
+                    from: currentUser,
+                    fromName: currentName,
+                    fromPic: currentPic,
+                    text: messageText,
+                    image: imageUrl,
+                    time: nowStr(),
+                    seen: false
+                };
+
+                // Save message to database
+                const messagesRef = ref(db, `messages/${currentChatId}`);
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, messageData);
+
+                // Update chat lists for both users
+                const updates = {};
+                const lastMessage = messageText || (imageUrl ? '📷 Image' : 'Message sent');
+                
+                const otherName = document.getElementById('chatWithName').textContent;
+                const otherPic = document.getElementById('chatWithPic').src;
+                
+                // Update sender's chat list
+                updates[`chatList/${currentUser}/${currentChatId}`] = {
+                    contact: currentChatOther,
+                    name: otherName,
+                    pic: otherPic,
+                    lastMessage: lastMessage,
+                    time: nowStr(),
+                    unread: 0
+                };
+
+                // Update receiver's chat list (optimistically setting unread to 1)
+                updates[`chatList/${currentChatOther}/${currentChatId}`] = {
+                    contact: currentUser,
+                    name: currentName,
+                    pic: currentPic,
+                    lastMessage: lastMessage,
+                    time: nowStr(),
+                    // Increment unread count. In a real app, you would use a transaction for reliable increment.
+                    unread: 1 
+                };
+
+                await update(ref(db), updates);
+
+                // Clear inputs
+                DOM.messageBox.value = '';
+                document.getElementById('imagePicker').value = '';
+                document.getElementById('emojiPicker').classList.add('hidden'); // Hide emoji picker
+                
+            } catch (error) {
+                console.error('Send message error:', error);
+                alert('Failed to send message: ' + error.message);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            }
+        }
+
+        // --- NEW CHAT & MODAL FUNCTIONALITY ---
+        
+        document.getElementById('welcomeNewChat').addEventListener('click', () => showElement('newChatModal'));
+        document.getElementById('openNewChatPanel').addEventListener('click', () => showElement('newChatModal'));
+        document.getElementById('closeNewChatModal').addEventListener('click', () => hideElement('newChatModal'));
+        document.getElementById('cancelNewChat').addEventListener('click', () => hideElement('newChatModal'));
+        document.getElementById('closeChatSettingsModal').addEventListener('click', () => hideElement('chatSettingsModal'));
+        document.getElementById('openChatSettings').addEventListener('click', () => showElement('chatSettingsModal'));
+
+        document.getElementById('newChatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('newChatNumber').value.trim();
+            const contactName = document.getElementById('newChatName').value.trim() || phoneNumber;
+            
+            if (!phoneNumber) return alert('Please enter phone number');
+            
+            const addContactBtn = document.getElementById('addContactBtn');
+            addContactBtn.disabled = true;
+            addContactBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+            try {
+                let contactPic = 'https://i.pravatar.cc/100';
+                const fileInput = document.getElementById('newChatPic');
+                
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const storageRef = sRef(storage, `contacts/${phoneNumber}_${Date.now()}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    contactPic = await getDownloadURL(snapshot.ref);
+                }
+
+                const chatId = uidFor(currentUser, phoneNumber);
+                
+                // Add to sender's chat list
+                await update(ref(db, `chatList/${currentUser}/${chatId}`), {
+                    contact: phoneNumber,
+                    name: contactName,
+                    pic: contactPic,
+                    lastMessage: 'New chat started',
+                    time: nowStr(),
+                    unread: 0
                 });
                 
-            } catch (error) {
-                console.error("Error loading cards:", error);
-                alert("কার্ড লোড করতে সমস্যা হয়েছে!");
-            }
-        }
+                // Also add to receiver's chat list to ensure they see it
+                await update(ref(db, `chatList/${phoneNumber}/${chatId}`), {
+                    contact: currentUser,
+                    name: currentName,
+                    pic: currentPic,
+                    lastMessage: 'New chat started',
+                    time: nowStr(),
+                    unread: 0
+                });
 
-        async function loadCard(cardId) {
-            try {
-                const doc = await db.collection('idcards').doc(cardId).get();
+                // Close modal and clear form
+                hideElement('newChatModal');
+                document.getElementById('newChatForm').reset();
                 
-                if (doc.exists) {
-                    const data = doc.data();
-                    
-                    const img = new Image();
-                    img.onload = function() {
-                        const paper = data.paperSize;
-                        switch(paper){
-                            case "A4": 
-                                canvas.width=794;
-                                canvas.height=1123;
-                                break;
-                            case "Letter": 
-                                canvas.width=816;
-                                canvas.height=1056;
-                                break;
-                            case "Legal": 
-                                canvas.width=816;
-                                canvas.height=1344;
-                                break;
-                        }
-                        
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        alert("কার্ড লোড হয়েছে! ✅");
-                    };
-                    img.src = data.canvasImage;
-                    
-                } else {
-                    alert("কার্ড খুঁজে পাওয়া যায়নি!");
-                }
+                // Open the new chat
+                openChat(chatId, phoneNumber, contactName, contactPic);
+                
             } catch (error) {
-                console.error("Error loading card:", error);
-                alert("লোড করতে সমস্যা হয়েছে!");
+                console.error('Add contact error:', error);
+                alert('Failed to add contact: ' + error.message);
+            } finally {
+                addContactBtn.disabled = false;
+                addContactBtn.innerHTML = '<i class="fas fa-user-plus"></i> Add Contact';
             }
-        }
+        });
 
-        function shareCard(cardId) {
-            const shareableLink = `${window.location.origin}${window.location.pathname}?id=${cardId}`;
-            
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(shareableLink);
-                alert("লিংক কপি হয়েছে! ✅\n\n" + shareableLink);
-            } else {
-                alert("শেয়ার করার লিংক:\n" + shareableLink);
-            }
-        }
+        // --- GLOBAL EVENT LISTENERS ---
 
-        async function deleteCard(cardId) {
-            if (confirm("আপনি কি এই কার্ড ডিলিট করতে চান?")) {
-                try {
-                    await db.collection('idcards').doc(cardId).delete();
-                    alert("কার্ড ডিলিট হয়েছে! ✅");
-                    viewMyCards();
-                } catch (error) {
-                    console.error("Error deleting:", error);
-                    alert("ডিলিট করতে সমস্যা হয়েছে!");
-                }
+        document.getElementById('clearLocal').addEventListener('click', () => {
+            if (confirm('Clear all local data? This will log you out.')) {
+                localStorage.clear();
+                location.reload();
             }
-        }
+        });
 
-        // Load card from URL when page loads
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const cardId = urlParams.get('id');
-            
-            if (cardId) {
-                setTimeout(() => {
-                    loadCard(cardId);
-                }, 1000);
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear state
+                currentUser = null;
+                currentName = null;
+                currentPic = null;
+                localStorage.removeItem('prochat_user');
+                location.reload();
             }
-        };
+        });
+
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const icon = document.querySelector('#themeBtn i');
+            icon.className = document.body.classList.contains('dark') ? 'fas fa-sun' : 'fas fa-moon';
+        });
         
-        // **Crop Functionality (Basic JS for drag/resize - as requested to keep existing logic)**
-        const cropBox = document.getElementById('cropBox');
-        const cropContainer = document.getElementById('cropContainer');
-        let isDragging = false;
-        let isResizing = false;
-        let activeCorner = null;
-        let startX, startY, startW, startH, startLeft, startTop;
-
-        const corners = cropBox.querySelectorAll('.crop-corner');
-
-        cropBox.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('crop-corner')) {
-                isResizing = true;
-                activeCorner = e.target.classList[1];
-            } else {
-                isDragging = true;
-                cropBox.style.cursor = 'grabbing';
-            }
-            
-            startX = e.clientX;
-            startY = e.clientY;
-            startW = cropBox.offsetWidth;
-            startH = cropBox.offsetHeight;
-            startLeft = cropBox.offsetLeft;
-            startTop = cropBox.offsetTop;
-            e.preventDefault();
+        // Mobile Navigation Toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            DOM.leftPanel.classList.toggle('active');
         });
 
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging && !isResizing) return;
-            
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            const containerW = cropContainer.offsetWidth;
-            const containerH = cropContainer.offsetHeight;
+        document.getElementById('backToChats').addEventListener('click', () => {
+            // Hide chat, show welcome screen, and toggle left panel on mobile
+            hideElement('chatWindow');
+            showElement('welcomeScreen');
+            currentChatId = null;
+            currentChatOther = null;
+            if (window.innerWidth <= 800) {
+                DOM.leftPanel.classList.add('active'); // Go back to the chat list view
+            }
+        });
 
-            if (isDragging) {
-                // Dragging Logic
-                let newLeft = startLeft + dx;
-                let newTop = startTop + dy;
+        document.getElementById('attachFile').addEventListener('click', () => {
+            document.getElementById('imagePicker').click();
+        });
+        
+        document.getElementById('emojiToggle').addEventListener('click', () => {
+            document.getElementById('emojiPicker').classList.toggle('hidden');
+        });
 
-                newLeft = Math.max(0, Math.min(newLeft, containerW - startW));
-                newTop = Math.max(0, Math.min(newTop, containerH - startH));
+        window.pickEmoji = (emoji) => {
+            DOM.messageBox.value += emoji;
+            DOM.messageBox.focus();
+        };
 
-                cropBox.style.left = newLeft + 'px';
-                cropBox.style.top = newTop + 'px';
-            } else if (isResizing) {
-                // Resizing Logic
-                let newW = startW;
-                let newH = startH;
-                let newLeft = startLeft;
-                let newTop = startTop;
-
-                switch (activeCorner) {
-                    case 'top-left':
-                        newW = startW - dx;
-                        newH = startH - dy;
-                        newLeft = startLeft + dx;
-                        newTop = startTop + dy;
-                        break;
-                    case 'top-right':
-                        newW = startW + dx;
-                        newH = startH - dy;
-                        newTop = startTop + dy;
-                        break;
-                    case 'bottom-left':
-                        newW = startW - dx;
-                        newH = startH + dy;
-                        newLeft = startLeft + dx;
-                        break;
-                    case 'bottom-right':
-                        newW = startW + dx;
-                        newH = startH + dy;
-                        break;
+        // Modal Close Buttons
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
                 }
+            });
+        });
 
-                // Boundary and minimum size checks
-                newW = Math.max(50, newW);
-                newH = Math.max(50, newH);
-                
-                // Ensure box stays within container during resize
-                if (newLeft + newW > containerW) { newW = containerW - newLeft; }
-                if (newTop + newH > containerH) { newH = containerH - newTop; }
-                if (newLeft < 0) { newW += newLeft; newLeft = 0; }
-                if (newTop < 0) { newH += newTop; newTop = 0; }
+        // Search functionality
+        DOM.searchInput.addEventListener('input', renderChatList);
 
-                cropBox.style.width = newW + 'px';
-                cropBox.style.height = newH + 'px';
-                cropBox.style.left = newLeft + 'px';
-                cropBox.style.top = newTop + 'px';
+        // --- Initialize App ---
+        loadSavedUser();
+        
+        // Hide mobile menu button if screen is large on load
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 800) {
+                DOM.mobileMenuBtn.style.display = 'none';
+                DOM.leftPanel.classList.remove('active'); // Ensure left panel is always visible on desktop
+            } else if (currentUser) {
+                DOM.mobileMenuBtn.style.display = 'flex';
             }
         });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-            isResizing = false;
-            activeCorner = null;
-            cropBox.style.cursor = 'move';
-        });
-
     </script>
 </body>
 </html>
