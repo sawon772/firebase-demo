@@ -1,52 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Ultimate Chat App</title>
+<title>Ultimate Chat App</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
 <style>
-body {
-  font-family: Arial;
-  background: #e5e5e5;
-  margin:0; padding:0;
-  display:flex; justify-content:center; align-items:center; min-height:100vh;
-}
-#login, #chat {
-  background:#fff; border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.2);
-  padding:20px; width:90%; max-width:450px;
-}
-h2 { text-align:center; color:#333; }
-input[type="text"], input[type="file"] {
-  width:calc(100% - 24px); padding:10px; margin:10px 0;
-  border-radius:8px; border:1px solid #ccc;
-}
-button {
-  width:100%; padding:10px; margin-top:10px;
-  border:none; background:#007bff; color:white;
-  border-radius:8px; cursor:pointer; font-size:16px;
-}
-#messages {
-  height:300px; overflow-y:auto;
-  border:1px solid #ddd; padding:10px; border-radius:8px;
-  margin:10px 0; background:#f9f9f9;
-}
-.msg { padding:8px 12px; margin:6px 0; border-radius:12px; max-width:80%; word-wrap:break-word;}
+body { font-family: Arial; margin:0; padding:0; background:#f2f2f2; }
+body.dark { background:#18191a; color:white; }
+#login, #chat { max-width:500px; margin:50px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.2);}
+body.dark #login, body.dark #chat { background:#242526; }
+h2 { text-align:center; }
+input[type="text"], input[type="file"] { width:calc(100% - 24px); padding:10px; margin:10px 0; border-radius:8px; border:1px solid #ccc; }
+button { width:100%; padding:10px; border:none; border-radius:8px; background:#007bff; color:white; cursor:pointer; margin-top:10px; font-size:16px; }
+#messages { height:300px; overflow-y:auto; border:1px solid #ddd; padding:10px; border-radius:8px; margin:10px 0; display:flex; flex-direction:column; background:#f9f9f9; }
+body.dark #messages { background:#3a3b3c; border-color:#555; }
+.msg { padding:10px 14px; margin:6px 0; border-radius:12px; max-width:70%; word-wrap:break-word; position:relative;}
 .me { background:#d1e7ff; align-self:flex-end; text-align:right; }
 .other { background:#f1f1f1; align-self:flex-start; text-align:left; }
+body.dark .me { background:#0056b3; color:white; }
+body.dark .other { background:#3a3b3c; color:white; }
+.msg img { max-width:150px; border-radius:8px; display:block; margin-top:5px; }
 #typing { font-size:12px; color:#888; margin-bottom:5px; }
+body.dark #typing { color:#bbb; }
 #profile { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-#profile img { width:40px; height:40px; border-radius:50%; margin-right:10px; object-fit:cover;}
+#profile img { width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px; }
 #profile span { font-weight:bold; }
 .flex { display:flex; align-items:center; }
+#themeToggle { width:auto; padding:6px 12px; background:#28a745; margin-left:10px; color:white; border:none; border-radius:6px; cursor:pointer;}
+.emojiPicker { margin:5px 0; }
+.emojiPicker span { cursor:pointer; font-size:20px; margin-right:5px;}
 </style>
 </head>
 <body>
 
 <div id="login">
-  <h2>📱 Phone Login</h2>
+  <h2>📱 Login</h2>
   <input type="text" id="phoneInput" placeholder="+8801712345678">
   <input type="text" id="displayName" placeholder="Your Name">
   <input type="file" id="profileUpload" accept="image/*">
@@ -59,14 +49,25 @@ button {
       <img id="profilePic" src="https://i.pravatar.cc/40" alt="Profile">
       <span id="displayProfile"></span>
     </div>
-    <button onclick="logout()">Logout</button>
+    <div>
+      <button onclick="logout()">Logout</button>
+      <button id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+    </div>
   </div>
 
   <input type="text" id="toNumber" placeholder="Enter number to chat">
   <div id="typing"></div>
   <div id="messages"></div>
 
+  <div class="emojiPicker">
+    <span onclick="addEmoji('😊')">😊</span>
+    <span onclick="addEmoji('😂')">😂</span>
+    <span onclick="addEmoji('❤️')">❤️</span>
+    <span onclick="addEmoji('👍')">👍</span>
+  </div>
+
   <input type="text" id="messageInput" placeholder="Type a message...">
+  <input type="file" id="imageUpload" accept="image/*">
   <button onclick="sendMessage()">Send</button>
 </div>
 
@@ -75,7 +76,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
   authDomain: "fir-849f2.firebaseapp.com",
@@ -90,114 +90,94 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-let currentUser = "";
-let displayName = "";
-let profileURL = "";
+let currentUser="", displayName="", profileURL="";
 
-function login() {
-  const phone = document.getElementById("phoneInput").value.trim();
-  displayName = document.getElementById("displayName").value.trim() || "Anonymous";
-  const bdFormat = /^\+8801[3-9]\d{8}$/;
-  if (!bdFormat.test(phone)) return alert("❌ ভুল নাম্বার ফরম্যাট! উদাহরণ: +8801712345678");
-
-  const file = document.getElementById("profileUpload").files[0];
+function login(){
+  const phone=document.getElementById("phoneInput").value.trim();
+  displayName=document.getElementById("displayName").value.trim()||"Anonymous";
+  const bdFormat=/^\+8801[3-9]\d{8}$/;
+  if(!bdFormat.test(phone)) return alert("❌ Invalid phone format!");
+  const file=document.getElementById("profileUpload").files[0];
   if(file){
-    const storageRef = sRef(storage, `profiles/${phone}_${file.name}`);
-    uploadBytes(storageRef, file).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url)=>{
-        profileURL = url;
-        completeLogin(phone);
-      });
-    });
-  } else {
-    profileURL = "https://i.pravatar.cc/40";
-    completeLogin(phone);
-  }
+    const sRefObj=sRef(storage,`profiles/${phone}_${file.name}`);
+    uploadBytes(sRefObj,file).then(snap=>getDownloadURL(snap.ref).then(url=>{
+      profileURL=url; completeLogin(phone);
+    }));
+  } else { profileURL="https://i.pravatar.cc/40"; completeLogin(phone);}
 }
 
 function completeLogin(phone){
-  currentUser = phone;
-  localStorage.setItem("currentUser", phone);
-  localStorage.setItem("displayName", displayName);
-  localStorage.setItem("profileURL", profileURL);
-
-  document.getElementById("login").style.display = "none";
-  document.getElementById("chat").style.display = "block";
-  document.getElementById("displayProfile").innerText = displayName;
-  document.getElementById("profilePic").src = profileURL;
+  currentUser=phone;
+  localStorage.setItem("currentUser",phone);
+  localStorage.setItem("displayName",displayName);
+  localStorage.setItem("profileURL",profileURL);
+  document.getElementById("login").style.display="none";
+  document.getElementById("chat").style.display="block";
+  document.getElementById("displayProfile").innerText=displayName;
+  document.getElementById("profilePic").src=profileURL;
 }
 
-window.login = login;
+window.login=login;
+function logout(){ localStorage.clear(); location.reload();}
+window.logout=logout;
 
-function logout(){
-  localStorage.clear();
-  location.reload();
-}
-window.logout = logout;
+function addEmoji(e){ document.getElementById("messageInput").value+=e; }
 
 function sendMessage(){
-  const msg = document.getElementById("messageInput").value.trim();
-  const to = document.getElementById("toNumber").value.trim();
-  if(!msg || !to) return alert("নাম্বার ও মেসেজ লিখো!");
-  const chatWith = to;
-  const chatId = currentUser < to ? currentUser + "_" + to : to + "_" + currentUser;
-  const msgRef = push(ref(db, "messages/" + chatId));
-  set(msgRef,{
-    from: currentUser,
-    fromName: displayName,
-    fromPic: profileURL,
-    text: msg,
-    time: new Date().toLocaleString(),
-    seen: false
-  });
-  document.getElementById("messageInput").value = "";
+  const msg=document.getElementById("messageInput").value.trim();
+  const to=document.getElementById("toNumber").value.trim();
+  const imgFile=document.getElementById("imageUpload").files[0];
+  if(!msg && !imgFile) return alert("Message or image required!");
+  const chatId=currentUser<to ? currentUser+"_"+to : to+"_"+currentUser;
+  if(imgFile){
+    const imgRef=sRef(storage,`chatImages/${Date.now()}_${imgFile.name}`);
+    uploadBytes(imgRef,imgFile).then(snap=>getDownloadURL(snap.ref).then(url=>{
+      push(ref(db,"messages/"+chatId),{
+        from:currentUser, fromName:displayName, fromPic:profileURL,
+        text:msg, image:url, time:new Date().toLocaleString(), seen:false
+      });
+    }));
+  } else {
+    push(ref(db,"messages/"+chatId),{
+      from:currentUser, fromName:displayName, fromPic:profileURL,
+      text:msg, image:null, time:new Date().toLocaleString(), seen:false
+    });
+  }
+  document.getElementById("messageInput").value="";
+  document.getElementById("imageUpload").value="";
 }
-window.sendMessage = sendMessage;
+
+window.sendMessage=sendMessage;
 
 function loadMessages(){
-  const toInput = document.getElementById("toNumber");
-  const typingIndicator = document.getElementById("typing");
-  toInput.addEventListener("input", ()=>{
-    document.getElementById("messages").innerHTML = "";
-    const target = toInput.value.trim();
+  const toInput=document.getElementById("toNumber");
+  const typingIndicator=document.getElementById("typing");
+  toInput.addEventListener("input",()=>{
+    document.getElementById("messages").innerHTML="";
+    const target=toInput.value.trim();
     if(!target) return;
-    const chatId = currentUser < target ? currentUser + "_" + target : target + "_" + currentUser;
-    const chatRef = ref(db, "messages/"+chatId);
-
-    onChildAdded(chatRef, (data)=>{
-      const msg = data.val();
-      const div = document.createElement("div");
-      div.className = "msg " + (msg.from===currentUser ? "me" : "other");
-      div.innerHTML = `<b>${msg.from===currentUser ? "You" : msg.fromName}:</b> ${msg.text}`;
+    const chatId=currentUser<target ? currentUser+"_"+target : target+"_"+currentUser;
+    const chatRef=ref(db,"messages/"+chatId);
+    onChildAdded(chatRef,data=>{
+      const msg=data.val();
+      const div=document.createElement("div");
+      div.className="msg "+(msg.from===currentUser?"me":"other");
+      div.innerHTML=`<b>${msg.from===currentUser?"You":msg.fromName}:</b> ${msg.text||""} ${msg.image?'<br><img src="'+msg.image+'">':''}`;
       document.getElementById("messages").appendChild(div);
-      if(msg.from !== currentUser && !msg.seen){
-        set(ref(db,"messages/"+chatId+"/"+data.key+"/seen"), true);
-      }
-      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+      if(msg.from!==currentUser && !msg.seen){ set(ref(db,"messages/"+chatId+"/"+data.key+"/seen"),true);}
+      document.getElementById("messages").scrollTop=document.getElementById("messages").scrollHeight;
     });
-
-    // Typing indicator
-    const inputBox = document.getElementById("messageInput");
-    inputBox.addEventListener("input", ()=>{
-      typingIndicator.innerText = inputBox.value.length ? "Typing..." : "";
-    });
+    document.getElementById("messageInput").addEventListener("input",()=>{typingIndicator.innerText=document.getElementById("messageInput").value.length?"Typing...":"";});
   });
 }
 
-window.onload = ()=>{
-  const savedUser = localStorage.getItem("currentUser");
-  if(savedUser){
-    currentUser = savedUser;
-    displayName = localStorage.getItem("displayName") || "Anonymous";
-    profileURL = localStorage.getItem("profileURL") || "https://i.pravatar.cc/40";
-    document.getElementById("login").style.display = "none";
-    document.getElementById("chat").style.display = "block";
-    document.getElementById("displayProfile").innerText = displayName;
-    document.getElementById("profilePic").src = profileURL;
-  }
-  loadMessages();
-};
-</script>
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  document.getElementById("themeToggle").inner
+  Text = document.body.classList.contains("dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
+}
 
+loadMessages();
+</script>
 </body>
 </html>
