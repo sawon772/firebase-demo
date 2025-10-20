@@ -43,6 +43,8 @@
             background: var(--bg);
             color: var(--text);
             line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
@@ -661,10 +663,68 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Login Modal (Default Show) -->
+    <div class="modal" id="loginModal" style="display: flex;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Welcome to Pro Messenger</h3>
+            </div>
+            <div class="login-card" style="box-shadow: none; padding: 0;">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Country</label>
+                        <select id="countrySelect">
+                            <option value="+880">Bangladesh (+880)</option>
+                            <option value="+91">India (+91)</option>
+                            <option value="+62">Indonesia (+62)</option>
+                            <option value="+60">Malaysia (+60)</option>
+                            <option value="+977">Nepal (+977)</option>
+                            <option value="+92">Pakistan (+92)</option>
+                            <option value="+95">Myanmar (+95)</option>
+                            <option value="+66">Thailand (+66)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number (without country code)</label>
+                        <input type="tel" id="phoneInputSimple" placeholder="17XXXXXXXX" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="displayNameInput" placeholder="Your name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Profile Picture (Optional)</label>
+                        <div class="file-input">
+                            <input type="file" id="profileUploadInput" accept="image/*">
+                        </div>
+                    </div>
+
+                    <div class="login-actions">
+                        <button type="submit" class="btn" id="doLogin">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login / Register
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="clearLocal">
+                            Clear Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container (Hidden until login) -->
+    <div class="container hidden" id="appContainer">
         <!-- Left Panel - Chat List -->
         <div class="left-panel" id="leftPanel">
             <div class="header">
@@ -701,13 +761,11 @@
 
             <div class="chat-list" id="chatList">
                 <!-- Chat items will be injected here -->
-                <div class="skeleton-chat">
-                    <div class="chat-item">
-                        <div class="chat-avatar skeleton" style="width: 52px; height: 52px;"></div>
-                        <div class="chat-content" style="flex: 1;">
-                            <div class="skeleton" style="height: 16px; width: 60%; margin-bottom: 8px;"></div>
-                            <div class="skeleton" style="height: 14px; width: 80%;"></div>
-                        </div>
+                <div class="chat-item">
+                    <div class="chat-avatar skeleton" style="width: 52px; height: 52px;"></div>
+                    <div class="chat-content" style="flex: 1;">
+                        <div class="skeleton" style="height: 16px; width: 60%; margin-bottom: 8px;"></div>
+                        <div class="skeleton" style="height: 14px; width: 80%;"></div>
                     </div>
                 </div>
             </div>
@@ -731,7 +789,7 @@
             </div>
 
             <!-- Chat Window (when chat is selected) -->
-            <div class="chat-window" id="chatWindow" style="display: none;">
+            <div class="chat-window hidden" id="chatWindow">
                 <div class="chat-header-main">
                     <button class="back-to-chats" id="backToChats">
                         <i class="fas fa-arrow-left"></i>
@@ -771,7 +829,7 @@
                             </button>
                         </div>
                     </div>
-                    <div class="emoji-picker" id="emojiPicker" style="display: none;">
+                    <div class="emoji-picker hidden" id="emojiPicker">
                         <span class="emoji" onclick="pickEmoji('😊')">😊</span>
                         <span class="emoji" onclick="pickEmoji('😂')">😂</span>
                         <span class="emoji" onclick="pickEmoji('❤️')">❤️</span>
@@ -789,62 +847,8 @@
         </div>
     </div>
 
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Welcome to Pro Messenger</h3>
-                <button class="close-btn" id="closeLoginModal">&times;</button>
-            </div>
-            <div class="login-card" style="box-shadow: none; padding: 0;">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Country</label>
-                        <select id="countrySelect">
-                            <option value="+880">Bangladesh (+880)</option>
-                            <option value="+91">India (+91)</option>
-                            <option value="+62">Indonesia (+62)</option>
-                            <option value="+60">Malaysia (+60)</option>
-                            <option value="+977">Nepal (+977)</option>
-                            <option value="+92">Pakistan (+92)</option>
-                            <option value="+95">Myanmar (+95)</option>
-                            <option value="+66">Thailand (+66)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" id="phoneInputSimple" placeholder="17XXXXXXXX" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="displayNameInput" placeholder="Your name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Profile Picture (Optional)</label>
-                        <div class="file-input">
-                            <input type="file" id="profileUploadInput" accept="image/*">
-                        </div>
-                    </div>
-
-                    <div class="login-actions">
-                        <button type="submit" class="btn" id="doLogin">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="clearLocal">
-                            Clear Data
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
     <!-- New Chat Modal -->
-    <div class="modal" id="newChatModal">
+    <div class="modal hidden" id="newChatModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Start New Chat</h3>
@@ -882,7 +886,7 @@
     </div>
 
     <!-- Chat Settings Modal -->
-    <div class="modal" id="chatSettingsModal">
+    <div class="modal hidden" id="chatSettingsModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Chat Options</h3>
@@ -905,69 +909,517 @@
     <input type="file" id="imagePicker" accept="image/*" style="display: none;">
 
     <script type="module">
-        // Firebase imports and configuration remain the same as your original code
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getDatabase, ref, push, set, onChildAdded, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
         import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
+        // Firebase Configuration - REPLACE WITH YOUR OWN CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
             authDomain: "fir-849f2.firebaseapp.com",
-            databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com/",
+            databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com",
             projectId: "fir-849f2",
             storageBucket: "fir-849f2.appspot.com",
             messagingSenderId: "695376931417",
             appId: "1:695376931417:web:b108541a5a7b216cc31f48"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const storage = getStorage(app);
 
-        // UI Elements
-        const leftPanel = document.getElementById('leftPanel');
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const backToChats = document.getElementById('backToChats');
-        const welcomeScreen = document.getElementById('welcomeScreen');
-        const chatWindow = document.getElementById('chatWindow');
-        
-        // Rest of your JavaScript functionality remains the same
-        // ... (your existing JavaScript code with minor adjustments for the new UI)
+        // App State
+        let currentUser = null;
+        let currentName = null;
+        let currentPic = null;
+        let currentChatId = null;
+        let currentChatOther = null;
+        let chatListeners = {};
 
-        // Mobile menu toggle
-        mobileMenuBtn.addEventListener('click', () => {
-            leftPanel.classList.add('active');
+        // Utility Functions
+        function uidFor(a, b) {
+            return [a, b].sort().join('_');
+        }
+
+        function nowStr() {
+            return new Date().toLocaleString();
+        }
+
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Authentication Functions
+        function loadSavedUser() {
+            const saved = localStorage.getItem('prochat_user');
+            if (saved) {
+                try {
+                    const obj = JSON.parse(saved);
+                    currentUser = obj.phone;
+                    currentName = obj.name;
+                    currentPic = obj.pic;
+                    updateUIAuth();
+                } catch (e) {
+                    localStorage.removeItem('prochat_user');
+                }
+            }
+        }
+
+        function saveUser() {
+            if (!currentUser) return;
+            localStorage.setItem('prochat_user', JSON.stringify({
+                phone: currentUser,
+                name: currentName,
+                pic: currentPic
+            }));
+        }
+
+        function updateUIAuth() {
+            if (currentUser) {
+                // Show app, hide login
+                hideElement('loginModal');
+                showElement('appContainer');
+                
+                // Update user info
+                document.getElementById('miniPic').src = currentPic || 'https://i.pravatar.cc/100';
+                document.getElementById('miniName').textContent = currentName || 'You';
+                document.getElementById('miniNumber').textContent = currentUser;
+                
+                // Load chats
+                renderChatList();
+            } else {
+                showElement('loginModal');
+                hideElement('appContainer');
+            }
+        }
+
+        // Login Functionality
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const country = document.getElementById('countrySelect').value;
+            const phone = document.getElementById('phoneInputSimple').value.trim();
+            const displayName = document.getElementById('displayNameInput').value.trim();
+            
+            if (!phone) {
+                alert('Please enter phone number');
+                return;
+            }
+            
+            if (!displayName) {
+                alert('Please enter display name');
+                return;
+            }
+
+            const phoneFull = country + phone.replace(/^0+/, '');
+            
+            try {
+                // Upload profile picture if selected
+                const fileInput = document.getElementById('profileUploadInput');
+                let profilePic = 'https://i.pravatar.cc/100';
+                
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const storageRef = sRef(storage, `profiles/${phoneFull}_${Date.now()}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    profilePic = await getDownloadURL(snapshot.ref);
+                }
+
+                // Set current user
+                currentUser = phoneFull;
+                currentName = displayName;
+                currentPic = profilePic;
+                
+                // Save to localStorage
+                saveUser();
+                
+                // Ensure user exists in database
+                const userRef = ref(db, `users/${currentUser}`);
+                await update(userRef, {
+                    name: currentName,
+                    pic: currentPic,
+                    lastSeen: nowStr()
+                });
+                
+                // Update UI
+                updateUIAuth();
+                
+                alert(`Successfully logged in as ${currentUser}`);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
         });
 
-        backToChats.addEventListener('click', () => {
-            leftPanel.classList.remove('active');
-            welcomeScreen.style.display = 'flex';
-            chatWindow.style.display = 'none';
+        // Chat List Rendering
+        function renderChatList() {
+            const chatListEl = document.getElementById('chatList');
+            if (!currentUser) return;
+
+            const chatListRef = ref(db, `chatList/${currentUser}`);
+            
+            onValue(chatListRef, (snapshot) => {
+                const chats = snapshot.val() || {};
+                const chatArray = Object.entries(chats).map(([id, data]) => ({ id, ...data }));
+                
+                // Sort by time
+                chatArray.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+                
+                // Clear loading skeleton
+                chatListEl.innerHTML = '';
+                
+                // Filter by search
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const filteredChats = chatArray.filter(chat => 
+                    !searchTerm || 
+                    (chat.name || '').toLowerCase().includes(searchTerm) ||
+                    (chat.contact || '').includes(searchTerm)
+                );
+                
+                if (filteredChats.length === 0) {
+                    chatListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--muted);">No chats found</div>';
+                    return;
+                }
+                
+                filteredChats.forEach(chat => {
+                    const chatItem = document.createElement('div');
+                    chatItem.className = 'chat-item';
+                    if (chat.id === currentChatId) {
+                        chatItem.classList.add('active');
+                    }
+                    
+                    chatItem.innerHTML = `
+                        <img class="chat-avatar" src="${chat.pic || 'https://i.pravatar.cc/100'}" alt="${chat.name}">
+                        <div class="chat-content">
+                            <div class="chat-header">
+                                <div class="chat-name">${chat.name || chat.contact}</div>
+                                <div class="time">${chat.time ? chat.time.split(',')[0] : ''}</div>
+                            </div>
+                            <div class="last-message">${chat.lastMessage || 'No messages yet'}</div>
+                        </div>
+                        ${chat.unread > 0 ? `<div class="unread-badge">${chat.unread}</div>` : ''}
+                    `;
+                    
+                    chatItem.addEventListener('click', () => openChat(chat.id, chat.contact, chat.name, chat.pic));
+                    chatListEl.appendChild(chatItem);
+                });
+            });
+        }
+
+        // Open Chat Function
+        function openChat(chatId, otherNumber, otherName, otherPic) {
+            currentChatId = chatId;
+            currentChatOther = otherNumber;
+            
+            // Update chat header
+            document.getElementById('chatWithName').textContent = otherName || otherNumber;
+            document.getElementById('chatWithNumber').textContent = otherNumber;
+            document.getElementById('chatWithPic').src = otherPic || 'https://i.pravatar.cc/100';
+            
+            // Reset unread count
+            if (currentUser) {
+                const userChatRef = ref(db, `chatList/${currentUser}/${chatId}`);
+                update(userChatRef, { unread: 0 });
+            }
+            
+            // Show chat window
+            hideElement('welcomeScreen');
+            showElement('chatWindow');
+            
+            // Clear previous messages
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.innerHTML = '';
+            
+            // Listen for messages
+            if (chatListeners[chatId]) return;
+            
+            const messagesRef = ref(db, `messages/${chatId}`);
+            onChildAdded(messagesRef, (snapshot) => {
+                const message = snapshot.val();
+                renderMessage(snapshot.key, message);
+                
+                // Mark as seen if from other user
+                if (message.from !== currentUser && !message.seen) {
+                    update(ref(db, `messages/${chatId}/${snapshot.key}`), { seen: true });
+                }
+            });
+            
+            chatListeners[chatId] = true;
+            
+            // Mobile: hide left panel
+            document.getElementById('leftPanel').classList.remove('active');
+        }
+
+        function renderMessage(key, message) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.from === currentUser ? 'sent' : 'received'}`;
+            
+            let messageHTML = `
+                <div style="font-weight: 600; margin-bottom: 4px;">
+                    ${message.from === currentUser ? 'You' : (message.fromName || message.from)}
+                </div>
+            `;
+            
+            if (message.text) {
+                messageHTML += `<div>${message.text}</div>`;
+            }
+            
+            if (message.image) {
+                messageHTML += `<img class="message-image" src="${message.image}" alt="Shared image" onclick="window.open('${message.image}', '_blank')">`;
+            }
+            
+            messageHTML += `
+                <div class="message-time">
+                    ${message.time || ''} ${message.seen ? '✓✓' : '✓'}
+                </div>
+            `;
+            
+            messageDiv.innerHTML = messageHTML;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send Message Functionality
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            await sendMessage();
         });
 
-        // Welcome screen new chat button
+        document.getElementById('messageBox').addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                await sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            if (!currentUser || !currentChatOther) {
+                alert('Please select a chat first');
+                return;
+            }
+
+            const messageInput = document.getElementById('messageBox');
+            const messageText = messageInput.value.trim();
+            const imageFile = document.getElementById('imagePicker').files[0];
+
+            if (!messageText && !imageFile) return;
+
+            const chatId = uidFor(currentUser, currentChatOther);
+
+            try {
+                let imageUrl = null;
+                
+                // Upload image if exists
+                if (imageFile) {
+                    const storageRef = sRef(storage, `chat_images/${chatId}_${Date.now()}_${imageFile.name}`);
+                    const snapshot = await uploadBytes(storageRef, imageFile);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                }
+
+                // Create message object
+                const messageData = {
+                    from: currentUser,
+                    fromName: currentName,
+                    fromPic: currentPic,
+                    text: messageText,
+                    image: imageUrl,
+                    time: nowStr(),
+                    seen: false
+                };
+
+                // Save message to database
+                const messagesRef = ref(db, `messages/${chatId}`);
+                const newMessageRef = push(messagesRef);
+                await set(newMessageRef, messageData);
+
+                // Update chat lists for both users
+                const updates = {};
+                const lastMessage = messageText || (imageUrl ? '📷 Image' : '');
+                
+                // Update sender's chat list
+                updates[`chatList/${currentUser}/${chatId}`] = {
+                    contact: currentChatOther,
+                    name: document.getElementById('chatWithName').textContent,
+                    pic: document.getElementById('chatWithPic').src,
+                    lastMessage: lastMessage,
+                    time: nowStr(),
+                    unread: 0
+                };
+
+                // Update receiver's chat list (increment unread)
+                updates[`chatList/${currentChatOther}/${chatId}`] = {
+                    contact: currentUser,
+                    name: currentName,
+                    pic: currentPic,
+                    lastMessage: lastMessage,
+                    time: nowStr(),
+                    unread: 1  // Increment this in real scenario
+                };
+
+                await update(ref(db), updates);
+
+                // Clear inputs
+                messageInput.value = '';
+                document.getElementById('imagePicker').value = '';
+
+            } catch (error) {
+                console.error('Send message error:', error);
+                alert('Failed to send message: ' + error.message);
+            }
+        }
+
+        // New Chat Functionality
         document.getElementById('welcomeNewChat').addEventListener('click', () => {
-            document.getElementById('newChatModal').style.display = 'flex';
+            showElement('newChatModal');
         });
 
-        // Emoji picker toggle
+        document.getElementById('openNewChatPanel').addEventListener('click', () => {
+            showElement('newChatModal');
+        });
+
+        document.getElementById('newChatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const phoneNumber = document.getElementById('newChatNumber').value.trim();
+            const contactName = document.getElementById('newChatName').value.trim() || phoneNumber;
+            
+            if (!phoneNumber) {
+                alert('Please enter phone number');
+                return;
+            }
+
+            try {
+                let contactPic = 'https://i.pravatar.cc/100';
+                const fileInput = document.getElementById('newChatPic');
+                
+                if (fileInput.files[0]) {
+                    const file = fileInput.files[0];
+                    const storageRef = sRef(storage, `contacts/${phoneNumber}_${Date.now()}_${file.name}`);
+                    const snapshot = await uploadBytes(storageRef, file);
+                    contactPic = await getDownloadURL(snapshot.ref);
+                }
+
+                const chatId = uidFor(currentUser, phoneNumber);
+                
+                // Add to chat list
+                await set(ref(db, `chatList/${currentUser}/${chatId}`), {
+                    contact: phoneNumber,
+                    name: contactName,
+                    pic: contactPic,
+                    lastMessage: '',
+                    time: nowStr(),
+                    unread: 0
+                });
+
+                // Close modal and clear form
+                hideElement('newChatModal');
+                document.getElementById('newChatForm').reset();
+                
+                // Open the new chat
+                openChat(chatId, phoneNumber, contactName, contactPic);
+                
+            } catch (error) {
+                console.error('Add contact error:', error);
+                alert('Failed to add contact: ' + error.message);
+            }
+        });
+
+        // UI Event Listeners
+        document.getElementById('clearLocal').addEventListener('click', () => {
+            if (confirm('Clear all local data?')) {
+                localStorage.clear();
+                location.reload();
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                currentName = null;
+                currentPic = null;
+                localStorage.removeItem('prochat_user');
+                location.reload();
+            }
+        });
+
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            const icon = document.querySelector('#themeBtn i');
+            if (document.body.classList.contains('dark')) {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        });
+
+        document.getElementById('backToChats').addEventListener('click', () => {
+            hideElement('chatWindow');
+            showElement('welcomeScreen');
+            currentChatId = null;
+            currentChatOther = null;
+        });
+
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('leftPanel').classList.add('active');
+        });
+
+        document.getElementById('attachFile').addEventListener('click', () => {
+            document.getElementById('imagePicker').click();
+        });
+
         document.getElementById('emojiToggle').addEventListener('click', () => {
             const emojiPicker = document.getElementById('emojiPicker');
-            emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'flex' : 'none';
+            emojiPicker.classList.toggle('hidden');
+        });
+
+        // Emoji Picker
+        window.pickEmoji = (emoji) => {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.value += emoji;
+            messageBox.focus();
+        };
+
+        // Modal Close Buttons
+        document.getElementById('closeNewChatModal').addEventListener('click', () => {
+            hideElement('newChatModal');
+        });
+
+        document.getElementById('cancelNewChat').addEventListener('click', () => {
+            hideElement('newChatModal');
+        });
+
+        document.getElementById('closeChatSettingsModal').addEventListener('click', () => {
+            hideElement('chatSettingsModal');
         });
 
         // Close modals when clicking outside
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
-                    modal.style.display = 'none';
+                    modal.classList.add('hidden');
                 }
             });
         });
 
-        // Your existing Firebase functions and event listeners go here
-        // ... (keep all your existing Firebase logic)
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', renderChatList);
 
+        // Initialize App
+        loadSavedUser();
+
+        // Debug
+        window.app = {
+            currentUser,
+            currentName,
+            currentPic,
+            db,
+            storage
+        };
     </script>
 </body>
 </html>
