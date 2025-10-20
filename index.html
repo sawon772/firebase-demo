@@ -1,135 +1,122 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Firebase Private Chat</title>
+  <meta charset="UTF-8">
+  <title>Phone Chat App</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <style>
+    body { font-family: Arial; background:#f2f2f2; text-align:center; }
+    #login,#chat{ width:90%; max-width:400px; margin:50px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+    input{width:90%; padding:10px; margin:10px; border-radius:6px; border:1px solid #ccc;}
+    button{padding:10px 20px; border:none; background:#007bff; color:white; border-radius:6px; cursor:pointer;}
+    #messages{height:250px; overflow-y:auto; border:1px solid #ddd; margin:10px 0; padding:10px; text-align:left; border-radius:6px;}
+    .msg{margin:5px 0; padding:8px; border-radius:6px;}
+    .me{background:#d1e7ff; text-align:right;}
+    .other{background:#f1f1f1; text-align:left;}
+  </style>
 </head>
 <body>
-  <h2>📱 Phone Login</h2>
 
-  <div id="loginBox">
-    <input type="text" id="phoneNumber" placeholder="+8801XXXXXXXXX"><br><br>
-    <div id="recaptcha-container"></div>
-    <button onclick="sendOTP()">Send OTP</button>
-  </div>
+<div id="login">
+  <h2>🔒 Phone Login</h2>
+  <input type="text" id="phoneInput" placeholder="+8801712345678">
+  <button onclick="login()">Login</button>
+</div>
 
-  <div id="verifyBox" style="display:none;">
-    <input type="text" id="otpCode" placeholder="Enter OTP"><br><br>
-    <button onclick="verifyOTP()">Verify</button>
-  </div>
+<div id="chat" style="display:none;">
+  <h2>💬 Chat</h2>
+  <p>Your Number: <span id="myNumber"></span></p>
+  <input type="text" id="toNumber" placeholder="Enter number to chat">
+  <div id="messages"></div>
+  <input type="text" id="messageInput" placeholder="Type a message...">
+  <button onclick="sendMessage()">Send</button>
+</div>
 
-  <div id="chatBox" style="display:none;">
-    <h3>Welcome! Chat System</h3>
-    <p>Your Number: <span id="myNumber"></span></p>
-    <input id="targetNumber" placeholder="Send to (+8801...)"><br><br>
-    <div id="messages" style="border:1px solid #ccc; padding:10px; height:200px; overflow:auto;"></div><br>
-    <input id="msgInput" placeholder="Type message">
-    <button onclick="sendMessage()">Send</button>
-  </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+  // 🔧 তোমার Firebase কনফিগ (তোমার URL ব্যবহার করে)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
+    authDomain: "fir-849f2.firebaseapp.com",
+    databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com/",
+    projectId: "fir-849f2",
+    storageBucket: "fir-849f2.appspot.com",
+    messagingSenderId: "695376931417",
+    appId: "1:695376931417:web:b108541a5a7b216cc31f48"
+  };
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
-      authDomain: "fir-849f2.firebaseapp.com",
-      databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com",
-      projectId: "fir-849f2",
-      storageBucket: "fir-849f2.firebasestorage.app",
-      messagingSenderId: "695376931417",
-      appId: "1:695376931417:web:b108541a5a7b216cc31f48"
-    };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
+  let currentUser = "";
+  let chatWith = "";
 
-    // Recaptcha তৈরি
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'normal',
-      'callback': (response) => {}
+  function login() {
+    const phone = document.getElementById("phoneInput").value.trim();
+    const bdFormat = /^\+8801[3-9]\d{8}$/;
+    if (!bdFormat.test(phone)) return alert("❌ ভুল নাম্বার ফরম্যাট! উদাহরণ: +8801712345678");
+
+    currentUser = phone;
+    localStorage.setItem("currentUser", phone);
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chat").style.display = "block";
+    document.getElementById("myNumber").innerText = currentUser;
+  }
+
+  window.login = login;
+
+  function sendMessage() {
+    const msg = document.getElementById("messageInput").value.trim();
+    const to = document.getElementById("toNumber").value.trim();
+    if (!msg || !to) return alert("নাম্বার ও মেসেজ লিখো!");
+    chatWith = to;
+
+    const chatId = currentUser < to ? currentUser + "_" + to : to + "_" + currentUser;
+    const msgRef = push(ref(db, "messages/" + chatId));
+    set(msgRef, {
+      from: currentUser,
+      text: msg,
+      time: new Date().toLocaleString()
     });
 
-    let confirmationResult;
-    let currentUser = null;
+    document.getElementById("messageInput").value = "";
+  }
 
-    // OTP পাঠানো
-    window.sendOTP = function() {
-      const phoneNumber = document.getElementById("phoneNumber").value;
-      signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
-        .then(result => {
-          confirmationResult = result;
-          alert("OTP পাঠানো হয়েছে!");
-          document.getElementById("loginBox").style.display = "none";
-          document.getElementById("verifyBox").style.display = "block";
-        })
-        .catch(error => alert(error.message));
-    }
+  window.sendMessage = sendMessage;
 
-    // OTP যাচাই করা
-    window.verifyOTP = function() {
-      const code = document.getElementById("otpCode").value;
-      confirmationResult.confirm(code)
-        .then(result => {
-          currentUser = result.user.phoneNumber;
-          document.getElementById("verifyBox").style.display = "none";
-          document.getElementById("chatBox").style.display = "block";
-          document.getElementById("myNumber").innerText = currentUser;
-          loadMessages();
-        })
-        .catch(error => alert("Wrong OTP!"));
-    }
-
-    // মেসেজ পাঠানো (নিজের নাম্বার অনুযায়ী আলাদা রুমে)
-    window.sendMessage = function() {
-      const target = document.getElementById("targetNumber").value.trim();
-      const message = document.getElementById("msgInput").value.trim();
-      if (!target || !message) return alert("নাম্বার ও মেসেজ লিখো!");
-
-      const chatId = makeChatId(currentUser, target);
-      const messagesRef = ref(db, `chats/${chatId}`);
-      const newMsgRef = push(messagesRef);
-
-      set(newMsgRef, {
-        from: currentUser,
-        to: target,
-        text: message,
-        time: new Date().toLocaleString()
+  function loadMessages() {
+    const toInput = document.getElementById("toNumber");
+    toInput.addEventListener("input", () => {
+      document.getElementById("messages").innerHTML = "";
+      const target = toInput.value.trim();
+      if (!target) return;
+      const chatId = currentUser < target ? currentUser + "_" + target : target + "_" + currentUser;
+      const chatRef = ref(db, "messages/" + chatId);
+      onChildAdded(chatRef, (data) => {
+        const msg = data.val();
+        const div = document.createElement("div");
+        div.className = "msg " + (msg.from === currentUser ? "me" : "other");
+        div.innerText = `${msg.from === currentUser ? "You" : msg.from}: ${msg.text}`;
+        document.getElementById("messages").appendChild(div);
+        const box = document.getElementById("messages");
+        box.scrollTop = box.scrollHeight;
       });
+    });
+  }
 
-      document.getElementById("msgInput").value = '';
+  window.onload = () => {
+    const savedUser = localStorage.getItem("currentUser");
+    if (savedUser) {
+      currentUser = savedUser;
+      document.getElementById("login").style.display = "none";
+      document.getElementById("chat").style.display = "block";
+      document.getElementById("myNumber").innerText = currentUser;
     }
-
-    // দুই নাম্বার মিলে একটিই ইউনিক রুম তৈরি
-    function makeChatId(num1, num2) {
-      return [num1, num2].sort().join("_");
-    }
-
-    // রিয়েলটাইমে মেসেজ দেখা
-    function loadMessages() {
-      const targetInput = document.getElementById("targetNumber");
-      targetInput.addEventListener("input", () => {
-        const target = targetInput.value.trim();
-        if (!target) return;
-        const chatId = makeChatId(currentUser, target);
-        const messagesRef = ref(db, `chats/${chatId}`);
-        onValue(messagesRef, (snapshot) => {
-          const data = snapshot.val();
-          const box = document.getElementById("messages");
-          box.innerHTML = '';
-          if (data) {
-            for (let key in data) {
-              const msg = data[key];
-              const p = document.createElement("p");
-              p.textContent = `${msg.from === currentUser ? "You" : msg.from}: ${msg.text} (${msg.time})`;
-              box.appendChild(p);
-            }
-          }
-        });
-      });
-    }
-  </script>
+    loadMessages();
+  };
+</script>
 </body>
 </html>
