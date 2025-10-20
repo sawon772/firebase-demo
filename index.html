@@ -1,1425 +1,1092 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pro Messenger - Firebase Chat</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro ID Card Print & Arrange Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #f2f4f8;
-            --card: #fff;
-            --text: #111;
-            --muted: #666;
-            --accent: #0b84ff;
-            --accent-hover: #0066cc;
-            --border: #e1e6ee;
-            --hover: rgba(0,0,0,0.03);
-            --shadow: 0 6px 18px rgba(3,10,18,0.06);
-            --radius: 12px;
-            --radius-sm: 8px;
-        }
-
-        body.dark {
-            --bg: #0f1214;
-            --card: #1b1f22;
-            --text: #e7e9ec;
-            --muted: #9aa0a6;
-            --accent: #2a9df4;
-            --accent-hover: #1a7dcc;
-            --border: #2a2f34;
-            --hover: rgba(255,255,255,0.05);
-            --shadow: 0 6px 18px rgba(0,0,0,0.2);
-        }
-
-        * {
-            box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
+        /* Base Reset and Fonts */
         body {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
             margin: 0;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
-            height: 100vh;
-            overflow: hidden;
+            padding: 0;
+            background: #f0f2f5; /* Light grey background */
+            color: #333;
         }
 
+        /* Container & Layout */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            height: 100vh;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        /* Left Panel - Chat List */
-        .left-panel {
-            width: 360px;
-            background: var(--card);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-            z-index: 10;
-        }
-
-        .header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card);
-        }
-
-        .profile-mini {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .profile-mini img {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--accent);
-        }
-
-        .profile-info h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .profile-info p {
-            margin: 2px 0 0;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: background 0.2s;
-        }
-
-        .btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-icon {
-            padding: 10px;
-            background: transparent;
-            border: none;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-icon:hover {
-            background: var(--hover);
-            color: var(--text);
-        }
-
-        .search-box {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .search-container {
-            position: relative;
-        }
-
-        .search-container i {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--muted);
-        }
-
-        .search-container input {
-            width: 100%;
-            padding: 12px 12px 12px 40px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 14px;
-        }
-
-        .new-chat-btn {
-            margin: 12px 20px;
-        }
-
-        .chat-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 8px;
-        }
-
-        .chat-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: background 0.2s;
-            position: relative;
-        }
-
-        .chat-item:hover {
-            background: var(--hover);
-        }
-
-        .chat-item.active {
-            background: var(--accent);
-            color: white;
-        }
-
-        .chat-item.active .last-message,
-        .chat-item.active .time {
-            color: rgba(255,255,255,0.8);
-        }
-
-        .chat-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .chat-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .chat-name {
-            font-weight: 600;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .time {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .last-message {
-            font-size: 13px;
-            color: var(--muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .unread-badge {
-            background: #ff4d6d;
-            color: white;
-            border-radius: 10px;
-            padding: 2px 8px;
-            font-size: 12px;
-            font-weight: 600;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        /* Right Panel - Chat Window */
-        .right-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg);
-            position: relative;
-        }
-
-        .chat-window {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-header-main {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border);
-            background: var(--card);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-partner {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chat-partner img {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .partner-info h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        .partner-info p {
-            margin: 2px 0 0;
-            font-size: 13px;
-            color: var(--muted);
-        }
-
-        .chat-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
         }
 
-        .message {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            position: relative;
-            animation: fadeIn 0.3s ease;
+        h1 {
+            color: #007bff;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 25px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        h2 {
+            font-weight: 400;
+            color: #555;
         }
 
-        .message.sent {
-            align-self: flex-end;
-            background: var(--accent);
-            color: white;
-            border-bottom-right-radius: 6px;
-        }
-
-        .message.received {
-            align-self: flex-start;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-bottom-left-radius: 6px;
-        }
-
-        .message-image {
-            max-width: 250px;
+        /* Forms & Inputs */
+        #loginForm, #registerForm {
+            background: white;
+            padding: 30px;
             border-radius: 12px;
-            margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            margin: 50px auto;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #loginForm input, #registerForm input, .main-controls input, .main-controls select {
+            width: 100%;
+            box-sizing: border-box; /* Fix for box-sizing issue */
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        #loginForm input:focus, #registerForm input:focus, .main-controls input:focus, .main-controls select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+        }
+
+        /* Buttons */
+        .btn, #loginForm button, #registerForm button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+            margin: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .message-time {
-            font-size: 11px;
-            margin-top: 4px;
-            opacity: 0.8;
-            text-align: right;
+        /* Primary Button - Login, Draw, Download */
+        .btn-primary, #loginForm button:first-of-type {
+            background: #007bff;
+            color: white;
+            width: calc(100% - 16px);
+            margin-top: 15px;
         }
 
-        .typing-indicator {
-            padding: 0 24px 12px;
-            font-size: 13px;
-            color: var(--muted);
-            font-style: italic;
+        .btn-primary:hover, #loginForm button:first-of-type:hover {
+            background: #0056b3;
         }
 
-        .message-composer {
-            padding: 16px 24px;
-            background: var(--card);
-            border-top: 1px solid var(--border);
+        /* Success Button - Register, Save */
+        .btn-success, #registerForm button:first-of-type {
+            background: #28a745;
+            color: white;
+            width: calc(100% - 16px);
+            margin-top: 15px;
         }
 
-        .composer-container {
+        .btn-success:hover, #registerForm button:first-of-type:hover {
+            background: #1e7e34;
+        }
+        
+        /* Secondary Button - Back, View Cards */
+        .btn-secondary, #registerForm button:last-of-type {
+            background: #6c757d;
+            color: white;
+            width: calc(100% - 16px);
+        }
+
+        .btn-secondary:hover, #registerForm button:last-of-type:hover {
+            background: #5a6268;
+        }
+        
+        /* Danger Button - Logout, Delete */
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Info/Camera Button */
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+
+        /* User Info */
+        .user-info {
+            background: #e9f7ef;
+            padding: 15px;
+            margin: 20px auto;
+            border-radius: 8px;
+            max-width: 90%;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .user-info button {
+            margin-left: 20px;
         }
 
-        .composer-container input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
+        /* Marquee Section */
+        .marquee-section {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            padding: 10px 0;
+            margin: 0 0 30px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .marquee {
+            white-space: nowrap;
+            animation: marquee 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .marquee span {
             font-size: 15px;
+            padding: 0 30px;
         }
 
-        .composer-actions {
+        /* Canvas and Card Controls */
+        #a4canvas {
+            width: 794px;
+            height: 1123px;
+            max-width: 100%;
+            border: 2px solid #ccc;
+            background: white;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .main-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin: 20px auto;
+        }
+        
+        .input-group {
             display: flex;
-            gap: 8px;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
-        .emoji-picker {
+        .input-group label {
+            font-weight: 600;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+
+        .file-upload-section {
             display: flex;
-            gap: 8px;
-            padding: 8px 0;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .file-upload-section input[type="file"] {
+            display: none;
         }
 
-        .emoji {
-            cursor: pointer;
-            font-size: 20px;
+        .preview-img {
+            width: 150px;
+            height: 95px; /* Added height for better visual consistency */
+            object-fit: contain;
+            margin: 10px;
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        /* Camera/Crop Section */
+        .camera-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px auto;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .camera-section h3 {
+            color: #17a2b8;
+        }
+
+        /* Crop Area Styles (Enhanced) */
+        .crop-area {
+            position: relative;
+            max-width: 90%;
+            margin: 30px auto;
+            border: 3px solid #007bff;
+            display: none;
+            box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .crop-box {
+            border: 2px dashed #ff4757;
+            background: rgba(255, 71, 87, 0.15);
+        }
+
+        .crop-corner {
+            width: 15px;
+            height: 15px;
+            background: #ff4757;
+        }
+
+        /* Saved Cards List */
+        #savedCardsList {
+            margin: 30px auto;
+            max-width: 90%;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-item {
+            border: 1px solid #e0e0e0;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            text-align: left;
             transition: transform 0.2s;
         }
-
-        .emoji:hover {
-            transform: scale(1.2);
+        
+        .card-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-item strong {
+            color: #007bff;
         }
 
-        /* Login Area */
-        .login-area {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            padding: 20px;
+        /* Footer */
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 20px;
+            margin-top: 50px;
+            border-top: 5px solid #3498db;
         }
 
-        .login-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 32px;
-            box-shadow: var(--shadow);
-            width: 100%;
-            max-width: 440px;
+        .footer-content h3 {
+            color: #3498db;
+            font-weight: 600;
         }
 
-        .login-card h2 {
-            margin: 0 0 8px;
-            text-align: center;
-            font-weight: 700;
+        .contact-info p {
+            margin: 10px 0;
         }
 
-        .login-card p {
-            text-align: center;
-            color: var(--muted);
-            margin-bottom: 24px;
+        .contact-info a {
+            color: #85c1e9;
         }
 
-        .form-group {
-            margin-bottom: 16px;
+        .whatsapp-btn {
+            background: #25D366;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text);
+        .whatsapp-btn:hover {
+            background: #128C7E;
         }
 
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 15px;
-        }
-
-        .file-input {
-            position: relative;
-        }
-
-        .file-input input {
-            padding: 12px 16px;
-            border: 1px dashed var(--border);
-            border-radius: var(--radius-sm);
-            background: transparent;
-        }
-
-        .login-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-        }
-
-        .login-actions .btn {
-            flex: 1;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-secondary:hover {
-            background: var(--hover);
-        }
-
-        /* Modals */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 24px;
-            width: 90%;
-            max-width: 440px;
-            box-shadow: var(--shadow);
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            flex: 1;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: var(--muted);
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-                height: 100vh;
-            }
-
-            .left-panel {
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                z-index: 20;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-
-            .left-panel.active {
-                transform: translateX(0);
-            }
-
-            .right-panel {
-                width: 100%;
-            }
-
-            .message {
-                max-width: 85%;
-            }
-
-            .header {
-                padding: 12px 16px;
-            }
-
-            .chat-header-main {
-                padding: 12px 16px;
-            }
-
-            .messages-container {
-                padding: 16px;
-            }
-
-            .message-composer {
-                padding: 12px 16px;
-            }
-
-            .mobile-menu-btn {
-                display: flex;
-            }
-
-            .back-to-chats {
-                display: flex;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .mobile-menu-btn,
-            .back-to-chats {
-                display: none;
-            }
-        }
-
-        .mobile-menu-btn,
-        .back-to-chats {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--text);
-            padding: 8px;
-        }
-
-        /* Welcome Screen */
-        .welcome-screen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .welcome-content {
-            max-width: 400px;
-        }
-
-        .welcome-icon {
-            font-size: 64px;
-            color: var(--accent);
-            margin-bottom: 20px;
-        }
-
-        .welcome-content h2 {
-            margin: 0 0 12px;
-            font-weight: 700;
-        }
-
-        .welcome-content p {
-            color: var(--muted);
-            margin-bottom: 24px;
-        }
-
-        /* Loading States */
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .skeleton {
-            background: linear-gradient(90deg, var(--hover) 25%, var(--border) 50%, var(--hover) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 4px;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
+        /* Utility Class */
         .hidden {
             display: none !important;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            #loginForm, #registerForm, #savedCardsList {
+                max-width: 95%;
+                margin: 20px auto;
+                padding: 20px;
+            }
+            
+            .btn, #loginForm button, #registerForm button {
+                font-size: 15px;
+                padding: 10px;
+                width: calc(100% - 16px);
+                margin: 5px 8px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .input-group input, .input-group select {
+                width: 100%;
+            }
+
+            .file-upload-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .preview-img {
+                width: 90%;
+                height: auto;
+                margin: 5px auto;
+            }
+
+            .marquee {
+                white-space: normal;
+                animation: none;
+                text-align: center;
+            }
+            .marquee span {
+                display: block;
+                padding: 5px 10px;
+            }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
 </head>
 <body>
-    <!-- Login Modal (Default Show) -->
-    <div class="modal" id="loginModal" style="display: flex;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Welcome to Pro Messenger</h3>
+
+    <div class="marquee-section">
+        <div class="marquee">
+            <span>📢 সম্মানিত ইউজার, আসসালামু আলাইকুম! এই টুলসের মাধ্যমে আপনি খুব সহজে এবং দ্রুত আপনার ন্যাশনাল আইডি কার্ড, ড্রাইভিং লাইসেন্স, বা যেকোনো আইডি কার্ড A4 সাইজের পেপারে পারফেক্টভাবে অ্যারেঞ্জ করে প্রিন্ট করতে পারবেন। সম্পূর্ণ অটোমেটিক সিস্টেম - আপনি শুধু ইমেজ আপলোড করুন, বাকি কাজ আমাদের টুলস করে দিবে! ধন্যবাদ।</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="loginForm">
+            <h2>🔐 Login to ID Card Tool</h2>
+            <input type="email" id="loginEmail" placeholder="Email" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button onclick="login()" class="btn-primary">Login</button>
+            <button onclick="showRegister()" class="btn-success">Register</button>
+            <p id="loginMessage"></p>
+        </div>
+
+        <div id="registerForm" class="hidden">
+            <h2>📝 Register New Account</h2>
+            <input type="text" id="registerName" placeholder="Full Name" required>
+            <input type="email" id="registerEmail" placeholder="Email" required>
+            <input type="password" id="registerPassword" placeholder="Password (min 6 characters)" required>
+            <button onclick="register()" class="btn-success">Register</button>
+            <button onclick="showLogin()" class="btn-secondary">Back to Login</button>
+            <p id="registerMessage"></p>
+        </div>
+
+        <div id="mainApp" class="hidden">
+            <div class="user-info">
+                Welcome, <span id="userName">User</span>! 
+                <button onclick="logout()" class="btn btn-danger">Logout</button>
             </div>
-            <div class="login-card" style="box-shadow: none; padding: 0;">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Country</label>
-                        <select id="countrySelect">
-                            <option value="+880">Bangladesh (+880)</option>
-                            <option value="+91">India (+91)</option>
-                            <option value="+62">Indonesia (+62)</option>
-                            <option value="+60">Malaysia (+60)</option>
-                            <option value="+977">Nepal (+977)</option>
-                            <option value="+92">Pakistan (+92)</option>
-                            <option value="+95">Myanmar (+95)</option>
-                            <option value="+66">Thailand (+66)</option>
+
+            <h1>🪪 Pro ID Card Print & Arrange Tool</h1>
+
+            <div class="camera-section">
+                <h3>📸 Image/Capture Options</h3>
+                <button class="btn btn-info" onclick="openCamera()">📸 ক্যামেরা খুলুন</button>
+                <button class="btn btn-info" onclick="uploadImage()">📁 ইমেজ আপলোড</button>
+                <button class="btn btn-info" onclick="startCrop()">✂️ ক্রপ শুরু করুন</button>
+            </div>
+
+            <div class="crop-area" id="cropContainer">
+                <img id="cropImage" class="crop-image" src="" alt="Image to Crop">
+                <div class="crop-box" id="cropBox">
+                    <div class="crop-corner top-left"></div>
+                    <div class="crop-corner top-right"></div>
+                    <div class="crop-corner bottom-left"></div>
+                    <div class="crop-corner bottom-right"></div>
+                </div>
+            </div>
+            <div id="cropButtons" class="hidden" style="margin: 10px;">
+                <button class="btn btn-success" onclick="applyCrop()">✅ ক্রপ অ্যাপ্লাই করুন</button>
+                <button class="btn btn-danger" onclick="cancelCrop()">❌ বাতিল করুন</button>
+            </div>
+
+            <div class="main-controls">
+                <div class="file-upload-section">
+                    <input type="file" id="file1" accept="image/*">
+                    <input type="file" id="file2" accept="image/*">
+                </div>
+                
+                <div class="preview-section">
+                    <img id="preview1" class="preview-img" src="" alt="Front Preview">
+                    <img id="preview2" class="preview-img" src="" alt="Back Preview">
+                    <p style="margin-top: 5px; font-size: 14px; color: #777;">⬆️ Front & Back Image Previews ⬆️</p>
+                </div>
+
+                <div class="input-group">
+                    <div>
+                        <label for="widthMM">Width (mm):</label>
+                        <input type="number" id="widthMM" value="85" step="0.1">
+                    </div>
+                    <div>
+                        <label for="heightMM">Height (mm):</label>
+                        <input type="number" id="heightMM" value="54" step="0.1">
+                    </div>
+                    <div>
+                        <label for="paperSize">Paper Size:</label>
+                        <select id="paperSize">
+                            <option value="A4">A4</option>
+                            <option value="Letter">Letter</option>
+                            <option value="Legal">Legal</option>
                         </select>
                     </div>
-
-                    <div class="form-group">
-                        <label>Phone Number (without country code)</label>
-                        <input type="tel" id="phoneInputSimple" placeholder="17XXXXXXXX" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="displayNameInput" placeholder="Your name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Profile Picture (Optional)</label>
-                        <div class="file-input">
-                            <input type="file" id="profileUploadInput" accept="image/*">
-                        </div>
-                    </div>
-
-                    <div class="login-actions">
-                        <button type="submit" class="btn" id="doLogin">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login / Register
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="clearLocal">
-                            Clear Data
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main App Container (Hidden until login) -->
-    <div class="container hidden" id="appContainer">
-        <!-- Left Panel - Chat List -->
-        <div class="left-panel" id="leftPanel">
-            <div class="header">
-                <div class="profile-mini">
-                    <img id="miniPic" src="https://i.pravatar.cc/100" alt="Profile">
-                    <div class="profile-info">
-                        <h3 id="miniName">Guest</h3>
-                        <p id="miniNumber">Not logged in</p>
+                    <div>
+                        <label for="downloadType">Download as:</label>
+                        <select id="downloadType">
+                            <option value="PDF">PDF</option>
+                            <option value="JPG">JPG</option>
+                            <option value="PNG">PNG</option>
+                        </select>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <button class="btn-icon" id="themeBtn" title="Toggle theme">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="btn-icon" id="logoutBtn" title="Logout">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="drawCanvas()">Preview & Arrange</button>
+                    <button class="btn btn-secondary" onclick="downloadOutput()">Download</button>
+                    <button class="btn btn-secondary" onclick="printCanvas()">Print</button>
+                    <button class="btn btn-secondary" onclick="shareCanvas()">Share</button>
+                    <button class="btn btn-success" onclick="saveToFirestore()">Save to Cloud</button>
+                    <button class="btn btn-info" onclick="viewMyCards()">My Saved Cards</button>
                 </div>
             </div>
 
-            <div class="search-box">
-                <div class="search-container">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="Search chats...">
-                </div>
-            </div>
+            <canvas id="a4canvas"></canvas>
 
-            <div class="new-chat-btn">
-                <button class="btn" id="openNewChatPanel" style="width: 100%;">
-                    <i class="fas fa-plus"></i>
-                    Start New Chat
-                </button>
-            </div>
+            <div id="savedCardsList"></div>
 
-            <div class="chat-list" id="chatList">
-                <!-- Chat items will be injected here -->
-                <div class="chat-item">
-                    <div class="chat-avatar skeleton" style="width: 52px; height: 52px;"></div>
-                    <div class="chat-content" style="flex: 1;">
-                        <div class="skeleton" style="height: 16px; width: 60%; margin-bottom: 8px;"></div>
-                        <div class="skeleton" style="height: 14px; width: 80%;"></div>
+            <footer class="footer">
+                <div class="footer-content">
+                    <h3>🆘 সাহায্যের জন্য যোগাযোগ করুন</h3>
+                    <div class="contact-info">
+                        <p>📱 WhatsApp: <a href="https://wa.me/8801881385068" target="_blank">01881385068</a></p>
+                        <p>⏰ সময়: সকাল ৯টা - রাত ১০টা</p>
+                        <p>💬 যেকোনো সমস্যায় আমরা আছি আপনার পাশে</p>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Panel - Chat Window -->
-        <div class="right-panel">
-            <!-- Welcome Screen (when no chat selected) -->
-            <div class="welcome-screen" id="welcomeScreen">
-                <div class="welcome-content">
-                    <div class="welcome-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h2>Welcome to Pro Messenger</h2>
-                    <p>Select a chat from the list to start messaging or create a new conversation.</p>
-                    <button class="btn" id="welcomeNewChat">
-                        <i class="fas fa-plus"></i>
-                        Start New Chat
-                    </button>
-                </div>
-            </div>
-
-            <!-- Chat Window (when chat is selected) -->
-            <div class="chat-window hidden" id="chatWindow">
-                <div class="chat-header-main">
-                    <button class="back-to-chats" id="backToChats">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <div class="chat-partner">
-                        <img id="chatWithPic" src="https://i.pravatar.cc/80" alt="Contact">
-                        <div class="partner-info">
-                            <h3 id="chatWithName">Select chat</h3>
-                            <p id="chatWithNumber">--</p>
-                        </div>
-                    </div>
-                    <div class="chat-actions">
-                        <button class="btn-icon" id="openChatSettings" title="Chat settings">
-                            <i class="fas fa-ellipsis-v"></i>
+                    <div class="social-links">
+                        <button class="whatsapp-btn" onclick="openWhatsApp()">
+                            📞 WhatsApp এ কথা বলুন
                         </button>
                     </div>
                 </div>
-
-                <div class="messages-container" id="chatMessages">
-                    <!-- Messages will be injected here -->
-                </div>
-
-                <div class="typing-indicator" id="typingIndicator"></div>
-
-                <div class="message-composer">
-                    <div class="composer-container">
-                        <button class="btn-icon" id="emojiToggle">
-                            <i class="far fa-smile"></i>
-                        </button>
-                        <input type="text" id="messageBox" placeholder="Type a message...">
-                        <div class="composer-actions">
-                            <button class="btn-icon" id="attachFile">
-                                <i class="fas fa-paperclip"></i>
-                            </button>
-                            <button class="btn" id="sendBtn">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="emoji-picker hidden" id="emojiPicker">
-                        <span class="emoji" onclick="pickEmoji('😊')">😊</span>
-                        <span class="emoji" onclick="pickEmoji('😂')">😂</span>
-                        <span class="emoji" onclick="pickEmoji('❤️')">❤️</span>
-                        <span class="emoji" onclick="pickEmoji('👍')">👍</span>
-                        <span class="emoji" onclick="pickEmoji('🎉')">🎉</span>
-                        <span class="emoji" onclick="pickEmoji('🙏')">🙏</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile Menu Button -->
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <i class="fas fa-bars"></i>
-            </button>
+            </footer>
         </div>
     </div>
 
-    <!-- New Chat Modal -->
-    <div class="modal hidden" id="newChatModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Start New Chat</h3>
-                <button class="close-btn" id="closeNewChatModal">&times;</button>
-            </div>
-            <form id="newChatForm">
-                <div class="form-group">
-                    <label>Contact Number (with country code)</label>
-                    <input type="tel" id="newChatNumber" placeholder="+8801712345678" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Contact Name (optional)</label>
-                    <input type="text" id="newChatName" placeholder="Friend's name">
-                </div>
-
-                <div class="form-group">
-                    <label>Contact Picture (optional)</label>
-                    <div class="file-input">
-                        <input type="file" id="newChatPic" accept="image/*">
-                    </div>
-                </div>
-
-                <div class="login-actions">
-                    <button type="submit" class="btn" id="addContactBtn">
-                        <i class="fas fa-user-plus"></i>
-                        Add Contact
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="cancelNewChat">
-                        Cancel
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Chat Settings Modal -->
-    <div class="modal hidden" id="chatSettingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Chat Options</h3>
-                <button class="close-btn" id="closeChatSettingsModal">&times;</button>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="btn btn-secondary" id="deleteChatBtn">
-                    <i class="fas fa-trash"></i>
-                    Delete Chat
-                </button>
-                <button class="btn btn-secondary" id="clearChatHistory">
-                    <i class="fas fa-broom"></i>
-                    Clear History
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Hidden file input for attachments -->
-    <input type="file" id="imagePicker" accept="image/*" style="display: none;">
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, push, set, onChildAdded, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-        // Firebase Configuration - REPLACE WITH YOUR OWN CONFIG
+    <script>
+        // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
-            authDomain: "fir-849f2.firebaseapp.com",
-            databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com",
-            projectId: "fir-849f2",
-            storageBucket: "fir-849f2.appspot.com",
-            messagingSenderId: "695376931417",
-            appId: "1:695376931417:web:b108541a5a7b216cc31f48"
+            apiKey: "AIzaSyB_jVIj6vnpjRowsysZg79oH3iPFEX40Ow",
+            authDomain: "idcardtool.firebaseapp.com",
+            projectId: "idcardtool",
+            storageBucket: "idcardtool.firebasestorage.app",
+            messagingSenderId: "542300187907",
+            appId: "1:542300187907:web:227d6f48edc5ca110d0d36",
+            measurementId: "G-9XP8EHP686"
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const storage = getStorage(app);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
-        // App State
-        let currentUser = null;
-        let currentName = null;
-        let currentPic = null;
-        let currentChatId = null;
-        let currentChatOther = null;
-        let chatListeners = {};
+        // Canvas Elements
+        const canvas = document.getElementById("a4canvas");
+        const ctx = canvas.getContext("2d");
+        let img1 = null;
+        let img2 = null;
 
-        // Utility Functions
-        function uidFor(a, b) {
-            return [a, b].sort().join('_');
-        }
-
-        function nowStr() {
-            return new Date().toLocaleString();
-        }
-
-        function showElement(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function hideElement(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+        // UI Elements
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+        const mainApp = document.getElementById("mainApp");
+        const loginMessage = document.getElementById("loginMessage");
+        const registerMessage = document.getElementById("registerMessage");
+        const userName = document.getElementById("userName");
 
         // Authentication Functions
-        function loadSavedUser() {
-            const saved = localStorage.getItem('prochat_user');
-            if (saved) {
-                try {
-                    const obj = JSON.parse(saved);
-                    currentUser = obj.phone;
-                    currentName = obj.name;
-                    currentPic = obj.pic;
-                    updateUIAuth();
-                } catch (e) {
-                    localStorage.removeItem('prochat_user');
-                }
-            }
+        function showRegister() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
         }
 
-        function saveUser() {
-            if (!currentUser) return;
-            localStorage.setItem('prochat_user', JSON.stringify({
-                phone: currentUser,
-                name: currentName,
-                pic: currentPic
-            }));
+        function showLogin() {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
         }
 
-        function updateUIAuth() {
-            if (currentUser) {
-                // Show app, hide login
-                hideElement('loginModal');
-                showElement('appContainer');
-                
-                // Update user info
-                document.getElementById('miniPic').src = currentPic || 'https://i.pravatar.cc/100';
-                document.getElementById('miniName').textContent = currentName || 'You';
-                document.getElementById('miniNumber').textContent = currentUser;
-                
-                // Load chats
-                renderChatList();
-            } else {
-                showElement('loginModal');
-                hideElement('appContainer');
-            }
-        }
+        function register() {
+            const name = document.getElementById("registerName").value;
+            const email = document.getElementById("registerEmail").value;
+            const password = document.getElementById("registerPassword").value;
 
-        // Login Functionality
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const country = document.getElementById('countrySelect').value;
-            const phone = document.getElementById('phoneInputSimple').value.trim();
-            const displayName = document.getElementById('displayNameInput').value.trim();
-            
-            if (!phone) {
-                alert('Please enter phone number');
-                return;
-            }
-            
-            if (!displayName) {
-                alert('Please enter display name');
+            if (password.length < 6) {
+                registerMessage.textContent = "Password must be at least 6 characters";
+                registerMessage.style.color = "red";
                 return;
             }
 
-            const phoneFull = country + phone.replace(/^0+/, '');
-            
-            try {
-                // Upload profile picture if selected
-                const fileInput = document.getElementById('profileUploadInput');
-                let profilePic = 'https://i.pravatar.cc/100';
-                
-                if (fileInput.files[0]) {
-                    const file = fileInput.files[0];
-                    const storageRef = sRef(storage, `profiles/${phoneFull}_${Date.now()}_${file.name}`);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    profilePic = await getDownloadURL(snapshot.ref);
-                }
-
-                // Set current user
-                currentUser = phoneFull;
-                currentName = displayName;
-                currentPic = profilePic;
-                
-                // Save to localStorage
-                saveUser();
-                
-                // Ensure user exists in database
-                const userRef = ref(db, `users/${currentUser}`);
-                await update(userRef, {
-                    name: currentName,
-                    pic: currentPic,
-                    lastSeen: nowStr()
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Save user name to Firestore
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        name: name,
+                        email: email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    registerMessage.textContent = "Registration successful!";
+                    registerMessage.style.color = "green";
+                    setTimeout(() => {
+                        showLogin();
+                    }, 2000);
+                })
+                .catch((error) => {
+                    registerMessage.textContent = "Error: " + error.message;
+                    registerMessage.style.color = "red";
                 });
-                
-                // Update UI
-                updateUIAuth();
-                
-                alert(`Successfully logged in as ${currentUser}`);
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
+        }
+
+        function login() {
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login successful
+                    loginMessage.textContent = "Login successful!";
+                    loginMessage.style.color = "green";
+                    
+                    // Get user data
+                    return db.collection('users').doc(userCredential.user.uid).get();
+                })
+                .then((doc) => {
+                    if (doc.exists) {
+                        userName.textContent = doc.data().name;
+                    }
+                    showMainApp();
+                })
+                .catch((error) => {
+                    loginMessage.textContent = "Error: " + error.message;
+                    loginMessage.style.color = "red";
+                });
+        }
+
+        function logout() {
+            auth.signOut().then(() => {
+                showLoginForm();
+            });
+        }
+
+        function showMainApp() {
+            loginForm.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+        }
+
+        function showLoginForm() {
+            mainApp.classList.add('hidden');
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            
+            // Clear forms
+            document.getElementById("loginEmail").value = "";
+            document.getElementById("loginPassword").value = "";
+            document.getElementById("registerName").value = "";
+            document.getElementById("registerEmail").value = "";
+            document.getElementById("registerPassword").value = "";
+            loginMessage.textContent = "";
+            registerMessage.textContent = "";
+        }
+
+        // Check if user is already logged in
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                db.collection('users').doc(user.uid).get().then((doc) => {
+                    if (doc.exists) {
+                        userName.textContent = doc.data().name;
+                    }
+                    showMainApp();
+                });
+            } else {
+                // User is signed out
+                showLoginForm();
             }
         });
 
-        // Chat List Rendering
-        function renderChatList() {
-            const chatListEl = document.getElementById('chatList');
-            if (!currentUser) return;
+        // নতুন ফাংশন: ক্যামেরা খোলা
+        function openCamera() {
+            alert('ক্যামেরা ফিচারটি খুব শীঘ্রই আসছে! এখন ইমেজ আপলোড করুন।');
+        }
 
-            const chatListRef = ref(db, `chatList/${currentUser}`);
+        // নতুন ফাংশন: ইমেজ আপলোড
+        function uploadImage() {
+            document.getElementById('file1').click();
+        }
+
+        // নতুন ফাংশন: ক্রপ শুরু
+        function startCrop() {
+            const cropContainer = document.getElementById('cropContainer');
+            const cropButtons = document.getElementById('cropButtons');
             
-            onValue(chatListRef, (snapshot) => {
-                const chats = snapshot.val() || {};
-                const chatArray = Object.entries(chats).map(([id, data]) => ({ id, ...data }));
+            if (document.getElementById('preview1').src) {
+                document.getElementById('cropImage').src = document.getElementById('preview1').src;
+                cropContainer.classList.remove('hidden');
+                cropButtons.classList.remove('hidden');
+                alert('ক্রপ শুরু করুন! ইমেজের কর্নার গুলো টেনে সাইজ adjust করুন।');
+            } else {
+                alert('প্রথমে একটি ইমেজ আপলোড করুন।');
+            }
+        }
+
+        // নতুন ফাংশন: ক্রপ অ্যাপ্লাই
+        function applyCrop() {
+            alert('ক্রপ অ্যাপ্লাই করা হয়েছে! এই ফিচারটি সম্পূর্ণ ভার্সনে available হবে।');
+            document.getElementById('cropContainer').classList.add('hidden');
+            document.getElementById('cropButtons').classList.add('hidden');
+        }
+
+        // নতুন ফাংশন: ক্রপ বাতিল
+        function cancelCrop() {
+            document.getElementById('cropContainer').classList.add('hidden');
+            document.getElementById('cropButtons').classList.add('hidden');
+        }
+
+        // নতুন ফাংশন: WhatsApp খোলা
+        function openWhatsApp() {
+            window.open('https://wa.me/8801881385068', '_blank');
+        }
+
+        // Existing ID Card Tool Functions (Same as before)
+        document.getElementById("file1").addEventListener("change", function(e){
+            if(e.target.files[0]){
+                const reader = new FileReader();
+                reader.onload = () => document.getElementById("preview1").src = reader.result;
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        document.getElementById("file2").addEventListener("change", function(e){
+            if(e.target.files[0]){
+                const reader = new FileReader();
+                reader.onload = () => document.getElementById("preview2").src = reader.result;
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        async function loadImage(file){
+            return new Promise(resolve=>{
+                const reader = new FileReader();
+                reader.onload = ()=>{
+                    const img = new Image();
+                    img.onload = ()=>resolve(img);
+                    img.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function drawCanvas(){
+            const file1 = document.getElementById("file1").files[0];
+            const file2 = document.getElementById("file2").files[0];
+            if(!file1 || !file2){
+                alert("দুইটি ফাইল বেছে নিন!");
+                return;
+            }
+            img1 = await loadImage(file1);
+            img2 = await loadImage(file2);
+            
+            const paper = document.getElementById("paperSize").value;
+            switch(paper){
+                case "A4": 
+                    canvas.width=794;
+                    canvas.height=1123;
+                    break;
+                case "Letter": 
+                    canvas.width=816;
+                    canvas.height=1056;
+                    break;
+                case "Legal": 
+                    canvas.width=816;
+                    canvas.height=1344;
+                    break;
+            }
+            
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle="white";
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+
+            const cardWidth = parseFloat(document.getElementById("widthMM").value)*3.78;
+            const cardHeight = parseFloat(document.getElementById("heightMM").value)*3.78;
+            const gap = 90;
+            const x = (canvas.width - cardWidth)/2;
+            const y1 = (canvas.height - (cardHeight*2 + gap))/2;
+            const y2 = y1 + cardHeight + gap;
+
+            ctx.drawImage(img1,x,y1,cardWidth,cardHeight);
+            ctx.drawImage(img2,x,y2,cardWidth,cardHeight);
+            
+            alert("প্রিভিউ তৈরি হয়েছে ✅");
+        }
+
+        function downloadOutput(){
+            const type = document.getElementById("downloadType").value;
+            if(type==="PDF"){
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF("p","pt",[canvas.width, canvas.height]);
+                pdf.addImage(canvas.toDataURL("image/jpeg"),"JPEG",0,0,canvas.width,canvas.height);
+                pdf.save("ID_Arranged.pdf");
+            } else {
+                const link = document.createElement("a");
+                link.download = `ID_Arranged.${type.toLowerCase()}`;
+                link.href = canvas.toDataURL(`image/${type.toLowerCase()}`);
+                link.click();
+            }
+        }
+
+        function printCanvas(){
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head><title>Print ID Card</title></head>
+                    <body style="text-align: center;">
+                        <img src="${canvas.toDataURL('image/png')}" style="max-width: 100%;">
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        async function shareCanvas(){
+            canvas.toBlob(async function(blob){
+                const filesArray = [new File([blob], "ID_A4.png", {type: "image/png"})];
+                if(navigator.canShare && navigator.canShare({ files: filesArray })){
+                    try{
+                        await navigator.share({
+                            files: filesArray,
+                            title: 'ID Card A4',
+                            text: 'Here is your arranged ID card!'
+                        });
+                        alert("Shared successfully ✅");
+                    } catch(err){
+                        alert("Share failed: " + err);
+                    }
+                } else {
+                    alert("Your device/browser does not support direct file sharing!");
+                }
+            });
+        }
+
+        // Modified Firebase Functions to include user ID
+        async function saveToFirestore() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please login first!");
+                return;
+            }
+
+            if (!canvas.width) {
+                alert("প্রথমে Preview তৈরি করুন!");
+                return;
+            }
+
+            const canvasDataURL = canvas.toDataURL('image/png');
+            const cardId = 'card_' + Date.now();
+            
+            try {
+                await db.collection('idcards').doc(cardId).set({
+                    canvasImage: canvasDataURL,
+                    image1: document.getElementById("preview1").src,
+                    image2: document.getElementById("preview2").src,
+                    width: document.getElementById("widthMM").value,
+                    height: document.getElementById("heightMM").value,
+                    paperSize: document.getElementById("paperSize").value,
+                    userId: user.uid, // Store user ID
+                    userName: userName.textContent,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 
-                // Sort by time
-                chatArray.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+                alert(`সফলভাবে সেভ হয়েছে! ✅\nআপনার ID: ${cardId}`);
                 
-                // Clear loading skeleton
-                chatListEl.innerHTML = '';
+                const shareableLink = `${window.location.origin}${window.location.pathname}?id=${cardId}`;
+                alert(`শেয়ার করার লিংক:\n${shareableLink}`);
                 
-                // Filter by search
-                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-                const filteredChats = chatArray.filter(chat => 
-                    !searchTerm || 
-                    (chat.name || '').toLowerCase().includes(searchTerm) ||
-                    (chat.contact || '').includes(searchTerm)
-                );
+            } catch (error) {
+                console.error("Error saving:", error);
+                alert("সেভ করতে সমস্যা হয়েছে!");
+            }
+        }
+
+        async function viewMyCards() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Please login first!");
+                return;
+            }
+
+            try {
+                const snapshot = await db.collection('idcards')
+                    .where("userId", "==", user.uid) // Only show user's cards
+                    .orderBy('createdAt', 'desc')
+                    .limit(10)
+                    .get();
                 
-                if (filteredChats.length === 0) {
-                    chatListEl.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--muted);">No chats found</div>';
+                const cardsList = document.getElementById('savedCardsList');
+                cardsList.innerHTML = '<h3>My Saved Cards:</h3>';
+                
+                if (snapshot.empty) {
+                    cardsList.innerHTML += '<p>No saved cards found.</p>';
                     return;
                 }
                 
-                filteredChats.forEach(chat => {
-                    const chatItem = document.createElement('div');
-                    chatItem.className = 'chat-item';
-                    if (chat.id === currentChatId) {
-                        chatItem.classList.add('active');
-                    }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const cardElement = document.createElement('div');
+                    cardElement.className = 'card-item';
                     
-                    chatItem.innerHTML = `
-                        <img class="chat-avatar" src="${chat.pic || 'https://i.pravatar.cc/100'}" alt="${chat.name}">
-                        <div class="chat-content">
-                            <div class="chat-header">
-                                <div class="chat-name">${chat.name || chat.contact}</div>
-                                <div class="time">${chat.time ? chat.time.split(',')[0] : ''}</div>
-                            </div>
-                            <div class="last-message">${chat.lastMessage || 'No messages yet'}</div>
-                        </div>
-                        ${chat.unread > 0 ? `<div class="unread-badge">${chat.unread}</div>` : ''}
+                    cardElement.innerHTML = `
+                        <p><strong>ID:</strong> ${doc.id}</p>
+                        <p><strong>Saved:</strong> ${data.createdAt?.toDate().toLocaleString() || 'Unknown'}</p>
+                        <p><strong>Size:</strong> ${data.width}mm x ${data.height}mm</p>
+                        <button class="btn btn-primary" onclick="loadCard('${doc.id}')">Load This Card</button>
+                        <button class="btn btn-secondary" onclick="shareCard('${doc.id}')">Share</button>
+                        <button class="btn btn-danger" onclick="deleteCard('${doc.id}')">Delete</button>
                     `;
                     
-                    chatItem.addEventListener('click', () => openChat(chat.id, chat.contact, chat.name, chat.pic));
-                    chatListEl.appendChild(chatItem);
+                    cardsList.appendChild(cardElement);
                 });
-            });
-        }
-
-        // Open Chat Function
-        function openChat(chatId, otherNumber, otherName, otherPic) {
-            currentChatId = chatId;
-            currentChatOther = otherNumber;
-            
-            // Update chat header
-            document.getElementById('chatWithName').textContent = otherName || otherNumber;
-            document.getElementById('chatWithNumber').textContent = otherNumber;
-            document.getElementById('chatWithPic').src = otherPic || 'https://i.pravatar.cc/100';
-            
-            // Reset unread count
-            if (currentUser) {
-                const userChatRef = ref(db, `chatList/${currentUser}/${chatId}`);
-                update(userChatRef, { unread: 0 });
-            }
-            
-            // Show chat window
-            hideElement('welcomeScreen');
-            showElement('chatWindow');
-            
-            // Clear previous messages
-            const messagesContainer = document.getElementById('chatMessages');
-            messagesContainer.innerHTML = '';
-            
-            // Listen for messages
-            if (chatListeners[chatId]) return;
-            
-            const messagesRef = ref(db, `messages/${chatId}`);
-            onChildAdded(messagesRef, (snapshot) => {
-                const message = snapshot.val();
-                renderMessage(snapshot.key, message);
-                
-                // Mark as seen if from other user
-                if (message.from !== currentUser && !message.seen) {
-                    update(ref(db, `messages/${chatId}/${snapshot.key}`), { seen: true });
-                }
-            });
-            
-            chatListeners[chatId] = true;
-            
-            // Mobile: hide left panel
-            document.getElementById('leftPanel').classList.remove('active');
-        }
-
-        function renderMessage(key, message) {
-            const messagesContainer = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.from === currentUser ? 'sent' : 'received'}`;
-            
-            let messageHTML = `
-                <div style="font-weight: 600; margin-bottom: 4px;">
-                    ${message.from === currentUser ? 'You' : (message.fromName || message.from)}
-                </div>
-            `;
-            
-            if (message.text) {
-                messageHTML += `<div>${message.text}</div>`;
-            }
-            
-            if (message.image) {
-                messageHTML += `<img class="message-image" src="${message.image}" alt="Shared image" onclick="window.open('${message.image}', '_blank')">`;
-            }
-            
-            messageHTML += `
-                <div class="message-time">
-                    ${message.time || ''} ${message.seen ? '✓✓' : '✓'}
-                </div>
-            `;
-            
-            messageDiv.innerHTML = messageHTML;
-            messagesContainer.appendChild(messageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        // Send Message Functionality
-        document.getElementById('sendBtn').addEventListener('click', async () => {
-            await sendMessage();
-        });
-
-        document.getElementById('messageBox').addEventListener('keypress', async (e) => {
-            if (e.key === 'Enter') {
-                await sendMessage();
-            }
-        });
-
-        async function sendMessage() {
-            if (!currentUser || !currentChatOther) {
-                alert('Please select a chat first');
-                return;
-            }
-
-            const messageInput = document.getElementById('messageBox');
-            const messageText = messageInput.value.trim();
-            const imageFile = document.getElementById('imagePicker').files[0];
-
-            if (!messageText && !imageFile) return;
-
-            const chatId = uidFor(currentUser, currentChatOther);
-
-            try {
-                let imageUrl = null;
-                
-                // Upload image if exists
-                if (imageFile) {
-                    const storageRef = sRef(storage, `chat_images/${chatId}_${Date.now()}_${imageFile.name}`);
-                    const snapshot = await uploadBytes(storageRef, imageFile);
-                    imageUrl = await getDownloadURL(snapshot.ref);
-                }
-
-                // Create message object
-                const messageData = {
-                    from: currentUser,
-                    fromName: currentName,
-                    fromPic: currentPic,
-                    text: messageText,
-                    image: imageUrl,
-                    time: nowStr(),
-                    seen: false
-                };
-
-                // Save message to database
-                const messagesRef = ref(db, `messages/${chatId}`);
-                const newMessageRef = push(messagesRef);
-                await set(newMessageRef, messageData);
-
-                // Update chat lists for both users
-                const updates = {};
-                const lastMessage = messageText || (imageUrl ? '📷 Image' : '');
-                
-                // Update sender's chat list
-                updates[`chatList/${currentUser}/${chatId}`] = {
-                    contact: currentChatOther,
-                    name: document.getElementById('chatWithName').textContent,
-                    pic: document.getElementById('chatWithPic').src,
-                    lastMessage: lastMessage,
-                    time: nowStr(),
-                    unread: 0
-                };
-
-                // Update receiver's chat list (increment unread)
-                updates[`chatList/${currentChatOther}/${chatId}`] = {
-                    contact: currentUser,
-                    name: currentName,
-                    pic: currentPic,
-                    lastMessage: lastMessage,
-                    time: nowStr(),
-                    unread: 1  // Increment this in real scenario
-                };
-
-                await update(ref(db), updates);
-
-                // Clear inputs
-                messageInput.value = '';
-                document.getElementById('imagePicker').value = '';
-
-            } catch (error) {
-                console.error('Send message error:', error);
-                alert('Failed to send message: ' + error.message);
-            }
-        }
-
-        // New Chat Functionality
-        document.getElementById('welcomeNewChat').addEventListener('click', () => {
-            showElement('newChatModal');
-        });
-
-        document.getElementById('openNewChatPanel').addEventListener('click', () => {
-            showElement('newChatModal');
-        });
-
-        document.getElementById('newChatForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const phoneNumber = document.getElementById('newChatNumber').value.trim();
-            const contactName = document.getElementById('newChatName').value.trim() || phoneNumber;
-            
-            if (!phoneNumber) {
-                alert('Please enter phone number');
-                return;
-            }
-
-            try {
-                let contactPic = 'https://i.pravatar.cc/100';
-                const fileInput = document.getElementById('newChatPic');
-                
-                if (fileInput.files[0]) {
-                    const file = fileInput.files[0];
-                    const storageRef = sRef(storage, `contacts/${phoneNumber}_${Date.now()}_${file.name}`);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    contactPic = await getDownloadURL(snapshot.ref);
-                }
-
-                const chatId = uidFor(currentUser, phoneNumber);
-                
-                // Add to chat list
-                await set(ref(db, `chatList/${currentUser}/${chatId}`), {
-                    contact: phoneNumber,
-                    name: contactName,
-                    pic: contactPic,
-                    lastMessage: '',
-                    time: nowStr(),
-                    unread: 0
-                });
-
-                // Close modal and clear form
-                hideElement('newChatModal');
-                document.getElementById('newChatForm').reset();
-                
-                // Open the new chat
-                openChat(chatId, phoneNumber, contactName, contactPic);
                 
             } catch (error) {
-                console.error('Add contact error:', error);
-                alert('Failed to add contact: ' + error.message);
+                console.error("Error loading cards:", error);
+                alert("কার্ড লোড করতে সমস্যা হয়েছে!");
             }
-        });
+        }
 
-        // UI Event Listeners
-        document.getElementById('clearLocal').addEventListener('click', () => {
-            if (confirm('Clear all local data?')) {
-                localStorage.clear();
-                location.reload();
+        async function loadCard(cardId) {
+            try {
+                const doc = await db.collection('idcards').doc(cardId).get();
+                
+                if (doc.exists) {
+                    const data = doc.data();
+                    
+                    const img = new Image();
+                    img.onload = function() {
+                        const paper = data.paperSize;
+                        switch(paper){
+                            case "A4": 
+                                canvas.width=794;
+                                canvas.height=1123;
+                                break;
+                            case "Letter": 
+                                canvas.width=816;
+                                canvas.height=1056;
+                                break;
+                            case "Legal": 
+                                canvas.width=816;
+                                canvas.height=1344;
+                                break;
+                        }
+                        
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        alert("কার্ড লোড হয়েছে! ✅");
+                    };
+                    img.src = data.canvasImage;
+                    
+                } else {
+                    alert("কার্ড খুঁজে পাওয়া যায়নি!");
+                }
+            } catch (error) {
+                console.error("Error loading card:", error);
+                alert("লোড করতে সমস্যা হয়েছে!");
             }
-        });
+        }
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
-                currentUser = null;
-                currentName = null;
-                currentPic = null;
-                localStorage.removeItem('prochat_user');
-                location.reload();
-            }
-        });
-
-        document.getElementById('themeBtn').addEventListener('click', () => {
-            document.body.classList.toggle('dark');
-            const icon = document.querySelector('#themeBtn i');
-            if (document.body.classList.contains('dark')) {
-                icon.className = 'fas fa-sun';
+        function shareCard(cardId) {
+            const shareableLink = `${window.location.origin}${window.location.pathname}?id=${cardId}`;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareableLink);
+                alert("লিংক কপি হয়েছে! ✅\n\n" + shareableLink);
             } else {
-                icon.className = 'fas fa-moon';
+                alert("শেয়ার করার লিংক:\n" + shareableLink);
+            }
+        }
+
+        async function deleteCard(cardId) {
+            if (confirm("আপনি কি এই কার্ড ডিলিট করতে চান?")) {
+                try {
+                    await db.collection('idcards').doc(cardId).delete();
+                    alert("কার্ড ডিলিট হয়েছে! ✅");
+                    viewMyCards();
+                } catch (error) {
+                    console.error("Error deleting:", error);
+                    alert("ডিলিট করতে সমস্যা হয়েছে!");
+                }
+            }
+        }
+
+        // Load card from URL when page loads
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cardId = urlParams.get('id');
+            
+            if (cardId) {
+                setTimeout(() => {
+                    loadCard(cardId);
+                }, 1000);
+            }
+        };
+        
+        // **Crop Functionality (Basic JS for drag/resize - as requested to keep existing logic)**
+        const cropBox = document.getElementById('cropBox');
+        const cropContainer = document.getElementById('cropContainer');
+        let isDragging = false;
+        let isResizing = false;
+        let activeCorner = null;
+        let startX, startY, startW, startH, startLeft, startTop;
+
+        const corners = cropBox.querySelectorAll('.crop-corner');
+
+        cropBox.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('crop-corner')) {
+                isResizing = true;
+                activeCorner = e.target.classList[1];
+            } else {
+                isDragging = true;
+                cropBox.style.cursor = 'grabbing';
+            }
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            startW = cropBox.offsetWidth;
+            startH = cropBox.offsetHeight;
+            startLeft = cropBox.offsetLeft;
+            startTop = cropBox.offsetTop;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging && !isResizing) return;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            const containerW = cropContainer.offsetWidth;
+            const containerH = cropContainer.offsetHeight;
+
+            if (isDragging) {
+                // Dragging Logic
+                let newLeft = startLeft + dx;
+                let newTop = startTop + dy;
+
+                newLeft = Math.max(0, Math.min(newLeft, containerW - startW));
+                newTop = Math.max(0, Math.min(newTop, containerH - startH));
+
+                cropBox.style.left = newLeft + 'px';
+                cropBox.style.top = newTop + 'px';
+            } else if (isResizing) {
+                // Resizing Logic
+                let newW = startW;
+                let newH = startH;
+                let newLeft = startLeft;
+                let newTop = startTop;
+
+                switch (activeCorner) {
+                    case 'top-left':
+                        newW = startW - dx;
+                        newH = startH - dy;
+                        newLeft = startLeft + dx;
+                        newTop = startTop + dy;
+                        break;
+                    case 'top-right':
+                        newW = startW + dx;
+                        newH = startH - dy;
+                        newTop = startTop + dy;
+                        break;
+                    case 'bottom-left':
+                        newW = startW - dx;
+                        newH = startH + dy;
+                        newLeft = startLeft + dx;
+                        break;
+                    case 'bottom-right':
+                        newW = startW + dx;
+                        newH = startH + dy;
+                        break;
+                }
+
+                // Boundary and minimum size checks
+                newW = Math.max(50, newW);
+                newH = Math.max(50, newH);
+                
+                // Ensure box stays within container during resize
+                if (newLeft + newW > containerW) { newW = containerW - newLeft; }
+                if (newTop + newH > containerH) { newH = containerH - newTop; }
+                if (newLeft < 0) { newW += newLeft; newLeft = 0; }
+                if (newTop < 0) { newH += newTop; newTop = 0; }
+
+                cropBox.style.width = newW + 'px';
+                cropBox.style.height = newH + 'px';
+                cropBox.style.left = newLeft + 'px';
+                cropBox.style.top = newTop + 'px';
             }
         });
 
-        document.getElementById('backToChats').addEventListener('click', () => {
-            hideElement('chatWindow');
-            showElement('welcomeScreen');
-            currentChatId = null;
-            currentChatOther = null;
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            isResizing = false;
+            activeCorner = null;
+            cropBox.style.cursor = 'move';
         });
 
-        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-            document.getElementById('leftPanel').classList.add('active');
-        });
-
-        document.getElementById('attachFile').addEventListener('click', () => {
-            document.getElementById('imagePicker').click();
-        });
-
-        document.getElementById('emojiToggle').addEventListener('click', () => {
-            const emojiPicker = document.getElementById('emojiPicker');
-            emojiPicker.classList.toggle('hidden');
-        });
-
-        // Emoji Picker
-        window.pickEmoji = (emoji) => {
-            const messageBox = document.getElementById('messageBox');
-            messageBox.value += emoji;
-            messageBox.focus();
-        };
-
-        // Modal Close Buttons
-        document.getElementById('closeNewChatModal').addEventListener('click', () => {
-            hideElement('newChatModal');
-        });
-
-        document.getElementById('cancelNewChat').addEventListener('click', () => {
-            hideElement('newChatModal');
-        });
-
-        document.getElementById('closeChatSettingsModal').addEventListener('click', () => {
-            hideElement('chatSettingsModal');
-        });
-
-        // Close modals when clicking outside
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.add('hidden');
-                }
-            });
-        });
-
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', renderChatList);
-
-        // Initialize App
-        loadSavedUser();
-
-        // Debug
-        window.app = {
-            currentUser,
-            currentName,
-            currentPic,
-            db,
-            storage
-        };
     </script>
 </body>
 </html>
