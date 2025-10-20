@@ -1,183 +1,581 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Ultimate Chat App</title>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js"></script>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pro Messenger - Firebase Chat</title>
+
+<!-- Firebase (modular via ESM) -->
+<script type="module">
+  // we will import inside the main script below
+</script>
+
 <style>
-body { font-family: Arial; margin:0; padding:0; background:#f2f2f2; }
-body.dark { background:#18191a; color:white; }
-#login, #chat { max-width:500px; margin:50px auto; background:white; padding:20px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.2);}
-body.dark #login, body.dark #chat { background:#242526; }
-h2 { text-align:center; }
-input[type="text"], input[type="file"] { width:calc(100% - 24px); padding:10px; margin:10px 0; border-radius:8px; border:1px solid #ccc; }
-button { width:100%; padding:10px; border:none; border-radius:8px; background:#007bff; color:white; cursor:pointer; margin-top:10px; font-size:16px; }
-#messages { height:300px; overflow-y:auto; border:1px solid #ddd; padding:10px; border-radius:8px; margin:10px 0; display:flex; flex-direction:column; background:#f9f9f9; }
-body.dark #messages { background:#3a3b3c; border-color:#555; }
-.msg { padding:10px 14px; margin:6px 0; border-radius:12px; max-width:70%; word-wrap:break-word; position:relative;}
-.me { background:#d1e7ff; align-self:flex-end; text-align:right; }
-.other { background:#f1f1f1; align-self:flex-start; text-align:left; }
-body.dark .me { background:#0056b3; color:white; }
-body.dark .other { background:#3a3b3c; color:white; }
-.msg img { max-width:150px; border-radius:8px; display:block; margin-top:5px; }
-#typing { font-size:12px; color:#888; margin-bottom:5px; }
-body.dark #typing { color:#bbb; }
-#profile { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-#profile img { width:40px; height:40px; border-radius:50%; object-fit:cover; margin-right:10px; }
-#profile span { font-weight:bold; }
-.flex { display:flex; align-items:center; }
-#themeToggle { width:auto; padding:6px 12px; background:#28a745; margin-left:10px; color:white; border:none; border-radius:6px; cursor:pointer;}
-.emojiPicker { margin:5px 0; }
-.emojiPicker span { cursor:pointer; font-size:20px; margin-right:5px;}
+  :root{
+    --bg:#f2f4f8;
+    --card:#fff;
+    --text:#111;
+    --muted:#666;
+    --accent:#0b84ff;
+  }
+  body.dark { --bg:#0f1214; --card:#1b1f22; --text:#e7e9ec; --muted:#9aa0a6; --accent:#2a9df4; }
+  body{ margin:0; font-family:Inter,Arial, sans-serif; background:var(--bg); color:var(--text); }
+  .container{ max-width:980px; margin:18px auto; display:flex; gap:18px; padding:12px; }
+  /* left: chat list, right: chat window */
+  .left, .right { background:var(--card); border-radius:12px; box-shadow:0 6px 18px rgba(3,10,18,0.06); padding:12px; }
+  .left{ width:320px; min-height:600px; display:flex; flex-direction:column; gap:12px; }
+  .right{ flex:1; min-height:600px; display:flex; flex-direction:column; gap:12px; }
+
+  /* header */
+  .header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .profileMini { display:flex; align-items:center; gap:8px; }
+  .profileMini img{ width:44px;height:44px;border-radius:50%; object-fit:cover; }
+  .btn { background:var(--accent); color:white; border:none; padding:8px 10px; border-radius:8px; cursor:pointer; }
+
+  /* login card */
+  .loginCard { display:flex; flex-direction:column; gap:8px; max-width:420px; margin:20px auto; padding:16px; }
+  input, select { padding:10px; border-radius:8px; border:1px solid #d6dbe3; background:transparent; color:var(--text); }
+  label { font-size:13px; color:var(--muted); }
+
+  /* chat list */
+  .searchBox { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+  .chatList { overflow:auto; flex:1; display:flex; flex-direction:column; gap:8px; }
+  .chatItem{ display:flex; gap:10px; align-items:center; padding:8px; border-radius:10px; cursor:pointer; }
+  .chatItem:hover{ background:rgba(0,0,0,0.03); }
+  .chatItem img{ width:50px;height:50px;border-radius:12px; object-fit:cover; }
+  .chatMeta{ flex:1; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .chatText{ display:flex; flex-direction:column; }
+  .name{ font-weight:600; }
+  .last{ font-size:13px; color:var(--muted); max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .time{ font-size:12px; color:var(--muted); }
+
+  /* chat window */
+  .chatHeader{ display:flex; align-items:center; gap:12px; padding-bottom:6px; border-bottom:1px solid #eef2f6; }
+  .chatMessages{ flex:1; overflow:auto; display:flex; flex-direction:column; gap:8px; padding:12px; }
+  .bubble{ max-width:70%; padding:10px 12px; border-radius:12px; word-wrap:break-word; }
+  .bubble.me{ margin-left:auto; background:#d1eaff; text-align:right; }
+  .bubble.other{ margin-right:auto; background:#f1f3f6; text-align:left; }
+  .bubble img{ max-width:180px; display:block; margin-top:6px; border-radius:8px; }
+
+  .composer{ display:flex; gap:8px; align-items:center; padding-top:8px; border-top:1px solid #eef2f6; }
+  .composer input[type="text"]{ flex:1; padding:10px; border-radius:10px; border:1px solid #e1e6ee; }
+  .smallBtn{ padding:8px; border-radius:8px; border:none; background:#e9eef7; cursor:pointer; }
+
+  .metaSmall{ font-size:12px; color:var(--muted); }
+
+  /* unread badge */
+  .badge{ background:#ff4d6d; color:white; padding:4px 7px; border-radius:14px; font-size:12px; }
+
+  /* responsiveness */
+  @media (max-width:900px){
+    .container{ flex-direction:column; padding:8px; }
+    .left{ width:100%; min-height:160px; order:2; }
+    .right{ order:1; min-height:420px; }
+  }
 </style>
+
 </head>
 <body>
 
-<div id="login">
-  <h2>📱 Login</h2>
-  <input type="text" id="phoneInput" placeholder="+8801712345678">
-  <input type="text" id="displayName" placeholder="Your Name">
-  <input type="file" id="profileUpload" accept="image/*">
-  <button onclick="login()">Login</button>
+<div class="container">
+  <!-- LEFT: Chat List -->
+  <div class="left">
+    <div class="header">
+      <div class="profileMini">
+        <img id="miniPic" src="https://i.pravatar.cc/100" alt="me">
+        <div>
+          <div id="miniName">Guest</div>
+          <div class="metaSmall" id="miniNumber">Not logged</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="smallBtn" id="newChatBtn">New</button>
+        <button class="smallBtn" id="themeBtn">Dark</button>
+        <button class="smallBtn" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <div class="searchBox">
+        <input id="searchInput" placeholder="Search chats..." />
+      </div>
+      <div style="margin:8px 0;">
+        <button class="btn" id="openNewChatPanel">Start Chat / Add Contact</button>
+      </div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+        <div class="chatList" id="chatList">
+          <!-- chat items injected here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Chat Window -->
+  <div class="right">
+    <!-- If not logged in, show login area -->
+    <div id="loginArea" style="display:none;">
+      <div class="loginCard">
+        <h3>Login / Create Account</h3>
+        <label>Country</label>
+        <select id="countrySelect">
+          <option value="+880">Bangladesh (+880)</option>
+          <option value="+91">India (+91)</option>
+          <option value="+62">Indonesia (+62)</option>
+          <option value="+60">Malaysia (+60)</option>
+          <option value="+977">Nepal (+977)</option>
+          <option value="+92">Pakistan (+92)</option>
+          <option value="+95">Myanmar (+95)</option>
+          <option value="+66">Thailand (+66)</option>
+        </select>
+
+        <label>Phone number (without country code)</label>
+        <input id="phoneInputSimple" placeholder="17XXXXXXXX" />
+
+        <label>Display name</label>
+        <input id="displayNameInput" placeholder="Your name" />
+
+        <label>Profile picture (optional)</label>
+        <input type="file" id="profileUploadInput" accept="image/*" />
+
+        <div style="display:flex; gap:8px;">
+          <button class="btn" id="doLogin">Login</button>
+          <button class="smallBtn" id="clearLocal">Clear saved</button>
+        </div>
+        <div class="metaSmall" style="margin-top:8px;">Note: you stay logged in after refresh. Logout removes local info.</div>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div id="chatArea" style="display:none; flex-direction:column; gap:8px;">
+      <div class="chatHeader">
+        <div style="display:flex; gap:12px; align-items:center;">
+          <img id="chatWithPic" src="https://i.pravatar.cc/80" style="width:56px;height:56px;border-radius:10px;object-fit:cover;">
+          <div>
+            <div id="chatWithName" style="font-weight:700">Select chat</div>
+            <div id="chatWithNumber" class="metaSmall">--</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="lastSeen" class="metaSmall">--</div>
+          <button class="smallBtn" id="openChatSettings">⋯</button>
+        </div>
+      </div>
+
+      <div id="chatMessages" class="chatMessages" style="background:transparent;"></div>
+
+      <div id="typingIndicator" class="metaSmall"></div>
+
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div style="flex:1; display:flex; gap:8px; align-items:center;">
+          <input id="messageBox" placeholder="Type a message" type="text" />
+          <input type="file" id="imagePicker" accept="image/*" />
+        </div>
+        <button class="btn" id="sendBtn">Send</button>
+      </div>
+
+      <div style="margin-top:6px;">
+        <div class="emojiPicker">
+          <span style="cursor:pointer" onclick="pickEmoji('😊')">😊</span>
+          <span style="cursor:pointer" onclick="pickEmoji('😂')">😂</span>
+          <span style="cursor:pointer" onclick="pickEmoji('❤️')">❤️</span>
+          <span style="cursor:pointer" onclick="pickEmoji('👍')">👍</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<div id="chat" style="display:none;">
-  <div id="profile" class="flex">
-    <div class="flex">
-      <img id="profilePic" src="https://i.pravatar.cc/40" alt="Profile">
-      <span id="displayProfile"></span>
-    </div>
-    <div>
-      <button onclick="logout()">Logout</button>
-      <button id="themeToggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+<!-- Modal / panels (simple) -->
+<div id="newChatPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center;">
+  <div style="background:var(--card); padding:16px; border-radius:10px; width:360px;">
+    <h3>Start new chat</h3>
+    <label>Contact Number (with country)</label>
+    <input id="newChatNumber" placeholder="+8801712345678" />
+    <label>Contact Name (optional)</label>
+    <input id="newChatName" placeholder="Friend name" />
+    <label>Contact Pic (optional)</label>
+    <input type="file" id="newChatPic" accept="image/*" />
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn" id="addContactBtn">Add / Open Chat</button>
+      <button class="smallBtn" id="closeNewChat">Cancel</button>
     </div>
   </div>
+</div>
 
-  <input type="text" id="toNumber" placeholder="Enter number to chat">
-  <div id="typing"></div>
-  <div id="messages"></div>
-
-  <div class="emojiPicker">
-    <span onclick="addEmoji('😊')">😊</span>
-    <span onclick="addEmoji('😂')">😂</span>
-    <span onclick="addEmoji('❤️')">❤️</span>
-    <span onclick="addEmoji('👍')">👍</span>
+<!-- Chat settings (delete) -->
+<div id="chatSettingsPanel" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); align-items:center; justify-content:center;">
+  <div style="background:var(--card); padding:12px; border-radius:10px; width:320px;">
+    <h4>Chat options</h4>
+    <button class="smallBtn" id="deleteChatBtn">Delete chat from my list</button>
+    <div style="margin-top:8px;"><button class="smallBtn" id="closeChatSettings">Close</button></div>
   </div>
-
-  <input type="text" id="messageInput" placeholder="Type a message...">
-  <input type="file" id="imageUpload" accept="image/*">
-  <button onclick="sendMessage()">Send</button>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, push, set, onChildAdded, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
-  authDomain: "fir-849f2.firebaseapp.com",
-  databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com/",
-  projectId: "fir-849f2",
-  storageBucket: "fir-849f2.appspot.com",
-  messagingSenderId: "695376931417",
-  appId: "1:695376931417:web:b108541a5a7b216cc31f48"
-};
+  // ---------- Replace with your firebase config ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
+    authDomain: "fir-849f2.firebaseapp.com",
+    databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com/",
+    projectId: "fir-849f2",
+    storageBucket: "fir-849f2.appspot.com",
+    messagingSenderId: "695376931417",
+    appId: "1:695376931417:web:b108541a5a7b216cc31f48"
+  };
+  // -------------------------------------------------------
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const storage = getStorage(app);
 
-let currentUser="", displayName="", profileURL="";
+  // UI refs
+  const loginArea = document.getElementById('loginArea');
+  const chatArea = document.getElementById('chatArea');
+  const miniPic = document.getElementById('miniPic');
+  const miniName = document.getElementById('miniName');
+  const miniNumber = document.getElementById('miniNumber');
+  const chatListEl = document.getElementById('chatList');
+  const chatMessagesEl = document.getElementById('chatMessages');
+  const chatWithName = document.getElementById('chatWithName');
+  const chatWithNumber = document.getElementById('chatWithNumber');
+  const chatWithPic = document.getElementById('chatWithPic');
+  const lastSeen = document.getElementById('lastSeen');
+  const typingIndicator = document.getElementById('typingIndicator');
 
-function login(){
-  const phone=document.getElementById("phoneInput").value.trim();
-  displayName=document.getElementById("displayName").value.trim()||"Anonymous";
-  const bdFormat=/^\+8801[3-9]\d{8}$/;
-  if(!bdFormat.test(phone)) return alert("❌ Invalid phone format!");
-  const file=document.getElementById("profileUpload").files[0];
-  if(file){
-    const sRefObj=sRef(storage,`profiles/${phone}_${file.name}`);
-    uploadBytes(sRefObj,file).then(snap=>getDownloadURL(snap.ref).then(url=>{
-      profileURL=url; completeLogin(phone);
-    }));
-  } else { profileURL="https://i.pravatar.cc/40"; completeLogin(phone);}
-}
+  const doLoginBtn = document.getElementById('doLogin');
+  const countrySelect = document.getElementById('countrySelect');
+  const phoneInputSimple = document.getElementById('phoneInputSimple');
+  const displayNameInput = document.getElementById('displayNameInput');
+  const profileUploadInput = document.getElementById('profileUploadInput');
+  const clearLocal = document.getElementById('clearLocal');
 
-function completeLogin(phone){
-  currentUser=phone;
-  localStorage.setItem("currentUser",phone);
-  localStorage.setItem("displayName",displayName);
-  localStorage.setItem("profileURL",profileURL);
-  document.getElementById("login").style.display="none";
-  document.getElementById("chat").style.display="block";
-  document.getElementById("displayProfile").innerText=displayName;
-  document.getElementById("profilePic").src=profileURL;
-}
+  const newChatPanel = document.getElementById('newChatPanel');
+  const openNewChatPanelBtn = document.getElementById('openNewChatPanel');
+  const closeNewChat = document.getElementById('closeNewChat');
+  const addContactBtn = document.getElementById('addContactBtn');
+  const newChatNumber = document.getElementById('newChatNumber');
+  const newChatName = document.getElementById('newChatName');
+  const newChatPic = document.getElementById('newChatPic');
 
-window.login=login;
-function logout(){ localStorage.clear(); location.reload();}
-window.logout=logout;
+  const newChatBtn = document.getElementById('newChatBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const themeBtn = document.getElementById('themeBtn');
+  const searchInput = document.getElementById('searchInput');
 
-function addEmoji(e){ document.getElementById("messageInput").value+=e; }
+  const messageBox = document.getElementById('messageBox');
+  const imagePicker = document.getElementById('imagePicker');
+  const sendBtn = document.getElementById('sendBtn');
 
-function sendMessage(){
-  const msg=document.getElementById("messageInput").value.trim();
-  const to=document.getElementById("toNumber").value.trim();
-  const imgFile=document.getElementById("imageUpload").files[0];
-  if(!msg && !imgFile) return alert("Message or image required!");
-  const chatId=currentUser<to ? currentUser+"_"+to : to+"_"+currentUser;
-  if(imgFile){
-    const imgRef=sRef(storage,`chatImages/${Date.now()}_${imgFile.name}`);
-    uploadBytes(imgRef,imgFile).then(snap=>getDownloadURL(snap.ref).then(url=>{
-      push(ref(db,"messages/"+chatId),{
-        from:currentUser, fromName:displayName, fromPic:profileURL,
-        text:msg, image:url, time:new Date().toLocaleString(), seen:false
-      });
-    }));
-  } else {
-    push(ref(db,"messages/"+chatId),{
-      from:currentUser, fromName:displayName, fromPic:profileURL,
-      text:msg, image:null, time:new Date().toLocaleString(), seen:false
+  const chatSettingsPanel = document.getElementById('chatSettingsPanel');
+  const openChatSettings = document.getElementById('openChatSettings');
+  const deleteChatBtn = document.getElementById('deleteChatBtn');
+  const closeChatSettings = document.getElementById('closeChatSettings');
+
+  // App state
+  let currentUser = null;     // phone string +country e.g. +88017...
+  let currentName = null;
+  let currentPic = null;
+  let currentChatId = null;
+  let currentChatOther = null; // other number
+  let chatListeners = {}; // for preventing duplicate listeners
+
+  // --- Utility ---
+  function uidFor(a,b){
+    // deterministic unique id for pair
+    return [a,b].sort().join('_');
+  }
+  function nowStr(){ return new Date().toLocaleString(); }
+  function el(tag, cls){ const d=document.createElement(tag); if(cls) d.className=cls; return d; }
+
+  // --- Persistence: load saved user ---
+  function loadSavedUser(){
+    const saved = localStorage.getItem('prochat_user');
+    if(saved){
+      try {
+        const obj = JSON.parse(saved);
+        currentUser = obj.phone;
+        currentName = obj.name;
+        currentPic = obj.pic;
+      } catch(e){ localStorage.removeItem('prochat_user'); }
+    }
+    updateUIAuth();
+  }
+
+  function saveUser(){
+    if(!currentUser) return;
+    localStorage.setItem('prochat_user', JSON.stringify({ phone: currentUser, name: currentName, pic: currentPic }));
+  }
+
+  function clearSaved(){
+    localStorage.removeItem('prochat_user');
+    location.reload();
+  }
+
+  // --- UI auth update ---
+  function updateUIAuth(){
+    if(currentUser){
+      // show chat area
+      loginArea.style.display = 'none';
+      chatArea.style.display = 'flex';
+      miniPic.src = currentPic || 'https://i.pravatar.cc/100';
+      miniName.innerText = currentName || 'You';
+      miniNumber.innerText = currentUser;
+      document.getElementById('miniNumber').style.color = 'var(--muted)';
+      // render chat list
+      renderChatList();
+    } else {
+      loginArea.style.display = 'block';
+      chatArea.style.display = 'none';
+    }
+  }
+
+  // --- Login flow ---
+  doLoginBtn.addEventListener('click', async ()=>{
+    const country = countrySelect.value || '+880';
+    const num = (phoneInputSimple.value || '').trim();
+    if(!num) return alert('Enter phone number (without country code)');
+    const phoneFull = country + num.replace(/^0+/,''); // basic
+    const disp = (displayNameInput.value || 'You').trim();
+
+    // upload profile if chosen
+    const file = profileUploadInput.files[0];
+    if(file){
+      const sref = sRef(storage, `profiles/${phoneFull}_${Date.now()}_${file.name}`);
+      const snap = await uploadBytes(sref, file);
+      const url = await getDownloadURL(snap.ref);
+      currentPic = url;
+    } else {
+      currentPic = 'https://i.pravatar.cc/100';
+    }
+
+    currentUser = phoneFull;
+    currentName = disp;
+    saveUser();
+    updateUIAuth();
+    // ensure user chatList node exists
+    const userChatsRef = ref(db, `chatList/${currentUser}`);
+    update(userChatsRef, {}); // no-op but ensures path
+    alert('Logged in as ' + currentUser);
+  });
+
+  clearLocal.addEventListener('click', ()=>{ if(confirm('Clear saved login?')) clearSaved(); });
+
+  logoutBtn.addEventListener('click', ()=>{ if(confirm('Logout?')){ currentUser=null; currentName=null; currentPic=null; localStorage.removeItem('prochat_user'); updateUIAuth(); location.reload(); }});
+
+  // new chat panel
+  openNewChatPanelBtn.addEventListener('click', ()=> newChatPanel.style.display='flex');
+  closeNewChat.addEventListener('click', ()=> newChatPanel.style.display='none');
+
+  addContactBtn.addEventListener('click', async ()=>{
+    const number = (newChatNumber.value || '').trim();
+    if(!number) return alert('Enter contact number with country code e.g. +88017...');
+    const name = newChatName.value.trim() || number;
+    let picUrl = 'https://i.pravatar.cc/100';
+    const file = newChatPic.files[0];
+    if(file){
+      const sref = sRef(storage, `contacts/${number}_${Date.now()}_${file.name}`);
+      const snap = await uploadBytes(sref, file);
+      picUrl = await getDownloadURL(snap.ref);
+    }
+    // add to current user's chatList
+    const chatId = uidFor(currentUser, number);
+    const chatRef = ref(db, `chatList/${currentUser}/${chatId}`);
+    await set(chatRef, { contact:number, name, pic:picUrl, lastMessage:'', time: nowStr(), unread:0 });
+    newChatPanel.style.display='none';
+    newChatNumber.value=''; newChatName.value=''; newChatPic.value='';
+    renderChatList();
+    openChat(chatId, number, name, picUrl);
+  });
+
+  // render chat list
+  async function renderChatList(){
+    chatListEl.innerHTML='';
+    if(!currentUser) return;
+    const chatListRef = ref(db, `chatList/${currentUser}`);
+    // listen for changes & initial load
+    onValue(chatListRef, (snap)=>{
+      const obj = snap.val() || {};
+      // convert to array sorted by time desc
+      const arr = Object.entries(obj).map(([id, v])=>({ id, ...v }));
+      arr.sort((a,b)=> (b.time||'') > (a.time||'') ? 1 : -1);
+      // filter by search
+      const q = (searchInput.value||'').toLowerCase();
+      chatListEl.innerHTML='';
+      arr.filter(item => !q || (item.name||'').toLowerCase().includes(q) || (item.contact||'').includes(q))
+        .forEach(item=>{
+          const it = el('div','chatItem');
+          const img = el('img'); img.src = item.pic || 'https://i.pravatar.cc/100';
+          const meta = el('div','chatMeta');
+          const text = el('div','chatText');
+          const nm = el('div','name'); nm.innerText = item.name || item.contact;
+          const last = el('div','last'); last.innerText = item.lastMessage || 'No messages yet';
+          const time = el('div','time'); time.innerText = item.time? item.time.split(',')[0] : '';
+          text.appendChild(nm); text.appendChild(last);
+          meta.appendChild(text); meta.appendChild(time);
+          it.appendChild(img); it.appendChild(meta);
+
+          // unread badge
+          if(item.unread && item.unread>0){
+            const b = el('div'); b.className='badge'; b.innerText = item.unread;
+            it.appendChild(b);
+          }
+          it.addEventListener('click', ()=> openChat(item.id, item.contact, item.name, item.pic));
+          chatListEl.appendChild(it);
+        });
     });
   }
-  document.getElementById("messageInput").value="";
-  document.getElementById("imageUpload").value="";
-}
 
-window.sendMessage=sendMessage;
+  searchInput.addEventListener('input', ()=> renderChatList());
 
-function loadMessages(){
-  const toInput=document.getElementById("toNumber");
-  const typingIndicator=document.getElementById("typing");
-  toInput.addEventListener("input",()=>{
-    document.getElementById("messages").innerHTML="";
-    const target=toInput.value.trim();
-    if(!target) return;
-    const chatId=currentUser<target ? currentUser+"_"+target : target+"_"+currentUser;
-    const chatRef=ref(db,"messages/"+chatId);
-    onChildAdded(chatRef,data=>{
-      const msg=data.val();
-      const div=document.createElement("div");
-      div.className="msg "+(msg.from===currentUser?"me":"other");
-      div.innerHTML=`<b>${msg.from===currentUser?"You":msg.fromName}:</b> ${msg.text||""} ${msg.image?'<br><img src="'+msg.image+'">':''}`;
-      document.getElementById("messages").appendChild(div);
-      if(msg.from!==currentUser && !msg.seen){ set(ref(db,"messages/"+chatId+"/"+data.key+"/seen"),true);}
-      document.getElementById("messages").scrollTop=document.getElementById("messages").scrollHeight;
+  // open chat
+  async function openChat(chatId, otherNumber, otherName, otherPic){
+    currentChatId = chatId;
+    currentChatOther = otherNumber;
+    chatWithName.innerText = otherName || otherNumber;
+    chatWithNumber.innerText = otherNumber;
+    chatWithPic.src = otherPic || 'https://i.pravatar.cc/100';
+    // reset unread count for this user-chat
+    const userChatRef = ref(db, `chatList/${currentUser}/${chatId}`);
+    update(userChatRef, { unread:0 });
+
+    // attach messages listener (single)
+    chatMessagesEl.innerHTML='';
+    if(chatListeners[chatId]) {
+      // already listening
+      return;
+    }
+    const msgRef = ref(db, `messages/${chatId}`);
+    onChildAdded(msgRef, (snap)=>{
+      const m = snap.val();
+      renderMessage(snap.key, m);
+      // if message is from other, mark seen
+      if(m.from !== currentUser && !m.seen){
+        update(ref(db, `messages/${chatId}/${snap.key}`), { seen:true });
+      }
     });
-    document.getElementById("messageInput").addEventListener("input",()=>{typingIndicator.innerText=document.getElementById("messageInput").value.length?"Typing...":"";});
+    chatListeners[chatId] = true;
+  }
+
+  function renderMessage(key, m){
+    const d = el('div');
+    d.className = 'bubble ' + (m.from === currentUser ? 'me' : 'other');
+    const header = `<div style="font-size:13px; font-weight:600; margin-bottom:6px;">${m.from===currentUser? 'You' : (m.fromName || m.from)}</div>`;
+    const txt = `<div>${m.text || ''}</div>`;
+    const img = m.image ? `<img src="${m.image}" alt="img">` : '';
+    const meta = `<div style="font-size:11px; color:var(--muted); margin-top:6px;">${m.time || ''} ${m.seen? ' ✓' : ''}</div>`;
+    d.innerHTML = header + txt + img + meta;
+    chatMessagesEl.appendChild(d);
+    chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+  }
+
+  // send message
+  sendBtn.addEventListener('click', async ()=>{
+    if(!currentUser) return alert('Login first');
+    const to = (document.getElementById('toNumber')?.value || currentChatOther || '').trim();
+    const msg = messageBox.value.trim();
+    const file = imagePicker.files[0];
+    const target = to || currentChatOther;
+    if(!target) return alert('Select or enter contact number (left panel or top)');
+    if(!msg && !file) return;
+
+    const chatId = uidFor(currentUser, target);
+    // image first (if any)
+    let imgUrl = null;
+    if(file){
+      const sref = sRef(storage, `chatImages/${chatId}_${Date.now()}_${file.name}`);
+      const snap = await uploadBytes(sref, file);
+      imgUrl = await getDownloadURL(snap.ref);
+    }
+    // push message
+    const mref = push(ref(db, `messages/${chatId}`));
+    const mObj = {
+      from: currentUser, fromName: currentName, fromPic: currentPic,
+      text: msg || '', image: imgUrl || null, time: nowStr(), seen:false
+    };
+    await set(mref, mObj);
+
+    // update chatList for both users with last message and increment unread for receiver
+    const updates = {};
+    updates[`chatList/${currentUser}/${chatId}`] = { contact: target, name: target, pic:'', lastMessage: mObj.text || (mObj.image? 'Image' : ''), time: mObj.time, unread: 0 };
+    // receiver's unread count - read current value then +1
+    const recRef = ref(db, `chatList/${target}/${chatId}`);
+    onValue(recRef, async (snap)=>{
+      const cur = snap.val() || {};
+      const unread = (cur.unread || 0) + (target !== currentUser ? 1 : 0);
+      updates[`chatList/${target}/${chatId}`] = { contact: currentUser, name: currentName, pic: currentPic || '', lastMessage: mObj.text || (mObj.image? 'Image' : ''), time: mObj.time, unread };
+      await update(ref(db, '/'), updates);
+    }, { onlyOnce:true });
+
+    // clear inputs
+    messageBox.value=''; imagePicker.value=null;
   });
-}
 
-function toggleTheme(){
-  document.body.classList.toggle("dark");
-  document.getElementById("themeToggle").inner
-  Text = document.body.classList.contains("dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
-}
+  // delete chat from my list
+  deleteChatBtn.addEventListener('click', async ()=>{
+    if(!currentUser || !currentChatId) return;
+    if(!confirm('Delete this chat from your list? This will not delete messages for others.')) return;
+    await remove(ref(db, `chatList/${currentUser}/${currentChatId}`));
+    chatSettingsPanel.style.display='none';
+    currentChatId = null;
+    renderChatList();
+    chatMessagesEl.innerHTML='';
+    chatWithName.innerText='Select chat';
+    chatWithNumber.innerText='--';
+  });
 
-loadMessages();
+  // open settings
+  openChatSettings.addEventListener('click', ()=> chatSettingsPanel.style.display='flex');
+  closeChatSettings.addEventListener('click', ()=> chatSettingsPanel.style.display='none');
+
+  // typing indicator (simple local show for now)
+  messageBox.addEventListener('input', ()=>{
+    const v = messageBox.value || '';
+    const target = document.getElementById('toNumber')?.value || currentChatOther;
+    typingIndicator.innerText = v.length ? 'Typing...' : '';
+    // (could push to DB under typing/{chatId}/{user} for remote show)
+  });
+
+  // pick emoji
+  window.pickEmoji = (e)=>{
+    messageBox.value = (messageBox.value || '') + e;
+    messageBox.focus();
+  };
+
+  // theme toggle
+  themeBtn.addEventListener('click', ()=>{
+    document.body.classList.toggle('dark');
+    themeBtn.innerText = document.body.classList.contains('dark') ? 'Light' : 'Dark';
+  });
+
+  // helper to open chat from multi places (if user clicks on left's chat item, openChat is called)
+  // but also allow entering number at top right: if user types a number and presses Enter, open that chat
+  document.getElementById('toNumber')?.addEventListener?.('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      const other = (document.getElementById('toNumber').value || '').trim();
+      if(!other) return;
+      // ensure chatList entry for currentUser exists (if not, auto add)
+      const chatId = uidFor(currentUser, other);
+      set(ref(db, `chatList/${currentUser}/${chatId}`), { contact: other, name: other, pic:'', lastMessage:'', time: nowStr(), unread:0 });
+      openChat(chatId, other, other, '');
+    }
+  });
+
+  // quick open new chat via top-left New button
+  newChatBtn.addEventListener('click', ()=> newChatPanel.style.display='flex');
+
+  // On load
+  loadSavedUser();
+  // ensure UI ready: if not logged in, show login area
+  if(!currentUser) loginArea.style.display='block';
+
+  // export some for console debug
+  window._pc = { openChat, renderChatList, db };
 </script>
+
 </body>
 </html>
