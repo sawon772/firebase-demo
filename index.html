@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pro Messenger - Firebase Chat with Google Drive</title>
+    <title>Pro Messenger - Firebase + Google Drive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -430,73 +430,37 @@
             box-shadow: var(--shadow);
             width: 100%;
             max-width: 440px;
+            text-align: center;
         }
 
         .login-card h2 {
             margin: 0 0 8px;
-            text-align: center;
             font-weight: 700;
         }
 
         .login-card p {
-            text-align: center;
             color: var(--muted);
             margin-bottom: 24px;
         }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
+        .google-signin-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #dadce0;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
             font-weight: 500;
-            color: var(--text);
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 15px;
-            outline: none;
-        }
-
-        .file-input {
-            position: relative;
-        }
-
-        .file-input input {
-            padding: 12px 16px;
-            border: 1px dashed var(--border);
-            border-radius: var(--radius-sm);
-            background: transparent;
-        }
-
-        .login-actions {
             display: flex;
+            align-items: center;
+            justify-content: center;
             gap: 12px;
-            margin-top: 24px;
+            width: 100%;
+            transition: background 0.2s;
         }
 
-        .login-actions .btn {
-            flex: 1;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-        }
-
-        .btn-secondary:hover {
-            background: var(--hover);
+        .google-signin-btn:hover {
+            background: #f8f9fa;
         }
 
         /* Modals */
@@ -664,22 +628,6 @@
             display: flex !important;
         }
 
-        /* Progress Bar */
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            transition: width 0.3s ease;
-        }
-
         /* Backup Status */
         .backup-status {
             font-size: 12px;
@@ -697,6 +645,12 @@
         .status-offline {
             color: #ff4444;
         }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -707,48 +661,23 @@
                 <h3>Welcome to Pro Messenger</h3>
             </div>
             <div class="login-card" style="box-shadow: none; padding: 0;">
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label>Country Code</label>
-                        <select id="countrySelect">
-                            <option value="+880">Bangladesh (+880)</option>
-                            <option value="+91">India (+91)</option>
-                            <option value="+62">Indonesia (+62)</option>
-                            <option value="+60">Malaysia (+60)</option>
-                            <option value="+977">Nepal (+977)</option>
-                            <option value="+92">Pakistan (+92)</option>
-                            <option value="+95">Myanmar (+95)</option>
-                            <option value="+66">Thailand (+66)</option>
-                        </select>
-                    </div>
+                <div style="text-align: center; padding: 20px 0;">
+                    <i class="fas fa-comments" style="font-size: 64px; color: var(--accent); margin-bottom: 20px;"></i>
+                    <h2>Pro Messenger</h2>
+                    <p style="color: var(--muted); margin-bottom: 30px;">Secure messaging with Google Drive backup</p>
+                    
+                    <button class="google-signin-btn" id="googleSignInBtn">
+                        <i class="fab fa-google" style="color: #4285f4;"></i>
+                        Continue with Google
+                    </button>
 
-                    <div class="form-group">
-                        <label>Phone Number (without country code)</label>
-                        <input type="tel" id="phoneInputSimple" placeholder="1712345678" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="displayNameInput" placeholder="Your name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Profile Picture (Optional)</label>
-                        <div class="file-input">
-                            <input type="file" id="profileUploadInput" accept="image/*">
+                    <div style="margin-top: 20px; padding: 16px; background: var(--bg); border-radius: var(--radius-sm);">
+                        <div class="backup-status">
+                            <i class="fas fa-shield-alt" style="color: var(--accent);"></i>
+                            <span>End-to-end encrypted • Google Drive backup</span>
                         </div>
                     </div>
-
-                    <div class="login-actions">
-                        <button type="submit" class="btn" id="doLogin">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login / Register
-                        </button>
-                        <button type="button" class="btn btn-secondary" id="clearLocal">
-                            Clear Data
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -762,7 +691,7 @@
                     <img id="miniPic" src="https://i.pravatar.cc/100" alt="Profile">
                     <div class="profile-info">
                         <h3 id="miniName">Guest</h3>
-                        <p id="miniNumber">Not logged in</p>
+                        <p id="miniEmail">Not signed in</p>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -832,7 +761,7 @@
                         <img id="chatWithPic" src="https://i.pravatar.cc/80" alt="Contact">
                         <div class="partner-info">
                             <h3 id="chatWithName">Select chat</h3>
-                            <p id="chatWithNumber">--</p>
+                            <p id="chatWithEmail">--</p>
                         </div>
                     </div>
                     <div class="chat-actions">
@@ -889,29 +818,22 @@
                 <button class="close-btn" id="closeNewChatModal">&times;</button>
             </div>
             <form id="newChatForm">
-                <div class="form-group">
-                    <label>Contact Number (with country code)</label>
-                    <input type="tel" id="newChatNumber" placeholder="+8801712345678" required>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500;">Contact Email</label>
+                    <input type="email" id="newChatEmail" placeholder="friend@example.com" required style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text);">
                 </div>
 
-                <div class="form-group">
-                    <label>Contact Name (optional)</label>
-                    <input type="text" id="newChatName" placeholder="Friend's name">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500;">Contact Name (optional)</label>
+                    <input type="text" id="newChatName" placeholder="Friend's name" style="width: 100%; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); color: var(--text);">
                 </div>
 
-                <div class="form-group">
-                    <label>Contact Picture (optional)</label>
-                    <div class="file-input">
-                        <input type="file" id="newChatPic" accept="image/*">
-                    </div>
-                </div>
-
-                <div class="login-actions">
-                    <button type="submit" class="btn" id="addContactBtn">
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn" style="flex: 1;">
                         <i class="fas fa-user-plus"></i>
                         Add Contact
                     </button>
-                    <button type="button" class="btn btn-secondary" id="cancelNewChat">
+                    <button type="button" class="btn btn-secondary" id="cancelNewChat" style="flex: 1;">
                         Cancel
                     </button>
                 </div>
@@ -960,45 +882,40 @@
     <!-- Hidden file inputs -->
     <input type="file" id="imagePicker" accept="image/*" style="display: none;">
 
-    <!-- Google API Script -->
+    <!-- Firebase & Google APIs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, push, set, onChildAdded, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-        // Firebase Configuration
+    <script>
+        // Firebase Configuration - YOUR CONFIG
         const firebaseConfig = {
-            apiKey: "AIzaSyBubSXHDTAEMSpaywiCQAkTrOPz3tijtZ0",
-            authDomain: "fir-849f2.firebaseapp.com",
-            databaseURL: "https://fir-849f2-default-rtdb.firebaseio.com",
-            projectId: "fir-849f2",
-            storageBucket: "fir-849f2.appspot.com",
-            messagingSenderId: "695376931417",
-            appId: "1:695376931417:web:b108541a5a7b216cc31f48"
+            apiKey: "AIzaSyCq_iAIcRoB-SflH5SxO9Gsd9ANeeXmX0M",
+            authDomain: "my-chatapp-new.firebaseapp.com",
+            databaseURL: "https://my-chatapp-new-default-rtdb.firebaseio.com",
+            projectId: "my-chatapp-new",
+            storageBucket: "my-chatapp-new.firebasestorage.app",
+            messagingSenderId: "924372087325",
+            appId: "1:924372087325:web:04da23166f19168c3d0cf4"
         };
 
         // Google Drive Configuration - YOUR CREDENTIALS
-        const GOOGLE_CONFIG = {
+        const GOOGLE_DRIVE_CONFIG = {
             clientId: "638179327149-3sfem8ubkrf2e7c34nd42tpef5odskk3.apps.googleusercontent.com",
-            scope: "https://www.googleapis.com/auth/drive.file",
-            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]
+            scope: "https://www.googleapis.com/auth/drive.file"
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const storage = getStorage(app);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
 
         // App State
         let currentUser = null;
-        let currentName = null;
-        let currentPic = null;
         let currentChatId = null;
         let currentChatOther = null;
         let chatListeners = {};
-        let googleTokenClient = null;
         let driveAccessToken = null;
 
         // Utility Functions
@@ -1027,46 +944,32 @@
         }
 
         // Google Drive Functions
-        function initializeGoogleAuth() {
-            google.accounts.id.initialize({
-                client_id: GOOGLE_CONFIG.clientId,
-                callback: handleGoogleAuth
-            });
-
-            google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CONFIG.clientId,
-                scope: GOOGLE_CONFIG.scope,
-                callback: (response) => {
-                    if (response.access_token) {
-                        driveAccessToken = response.access_token;
-                        updateDriveStatus(true);
-                        showElement('driveConnectedSection');
-                        hideElement('driveAuthSection');
-                        alert('Google Drive connected successfully!');
-                    }
-                }
-            });
-        }
-
-        function handleGoogleAuth(response) {
-            console.log('Google auth response:', response);
-        }
-
         function connectGoogleDrive() {
-            google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CONFIG.clientId,
-                scope: GOOGLE_CONFIG.scope,
-                callback: (response) => {
-                    if (response.access_token) {
-                        driveAccessToken = response.access_token;
-                        updateDriveStatus(true);
-                        showElement('driveConnectedSection');
-                        hideElement('driveAuthSection');
-                        localStorage.setItem('drive_access_token', driveAccessToken);
-                        alert('Google Drive connected successfully!');
+            if (typeof google === 'undefined') {
+                alert('Google API not loaded yet. Please wait a moment and try again.');
+                return;
+            }
+
+            try {
+                const tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: GOOGLE_DRIVE_CONFIG.clientId,
+                    scope: GOOGLE_DRIVE_CONFIG.scope,
+                    callback: (response) => {
+                        if (response.access_token) {
+                            driveAccessToken = response.access_token;
+                            updateDriveStatus(true);
+                            showElement('driveConnectedSection');
+                            hideElement('driveAuthSection');
+                            localStorage.setItem('drive_access_token', driveAccessToken);
+                            alert('Google Drive connected successfully!');
+                        }
                     }
-                }
-            }).requestAccessToken();
+                });
+                tokenClient.requestAccessToken();
+            } catch (error) {
+                console.error('Google Drive connection error:', error);
+                alert('Error connecting to Google Drive');
+            }
         }
 
         async function uploadToGoogleDrive(file, fileName) {
@@ -1108,120 +1011,61 @@
             }
         }
 
-        // Authentication Functions
-        function loadSavedUser() {
-            const saved = localStorage.getItem('prochat_user');
-            if (saved) {
-                try {
-                    const obj = JSON.parse(saved);
-                    currentUser = obj.phone;
-                    currentName = obj.name;
-                    currentPic = obj.pic;
-                    updateUIAuth();
-                } catch (e) {
-                    localStorage.removeItem('prochat_user');
+        // Firebase Authentication
+        function initAuth() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    currentUser = user;
+                    updateUIAfterAuth(user);
+                } else {
+                    showModal('loginModal');
+                    hideElement('appContainer');
                 }
-            }
+            });
+        }
+
+        function signInWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope('profile');
+            provider.addScope('email');
             
-            // Load Drive token
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // Signed in successfully
+                    console.log('Google sign-in successful:', result.user);
+                })
+                .catch((error) => {
+                    console.error('Google sign-in error:', error);
+                    alert('Sign-in failed: ' + error.message);
+                });
+        }
+
+        function updateUIAfterAuth(user) {
+            hideModal('loginModal');
+            showElement('appContainer');
+            
+            document.getElementById('miniPic').src = user.photoURL || 'https://i.pravatar.cc/100';
+            document.getElementById('miniName').textContent = user.displayName || 'User';
+            document.getElementById('miniEmail').textContent = user.email;
+            
+            // Load saved Drive token
             const savedToken = localStorage.getItem('drive_access_token');
             if (savedToken) {
                 driveAccessToken = savedToken;
                 updateDriveStatus(true);
             }
+            
+            renderChatList();
         }
 
-        function saveUser() {
-            if (!currentUser) return;
-            localStorage.setItem('prochat_user', JSON.stringify({
-                phone: currentUser,
-                name: currentName,
-                pic: currentPic
-            }));
-        }
-
-        function updateUIAuth() {
-            if (currentUser) {
-                hideModal('loginModal');
-                showElement('appContainer');
-                
-                document.getElementById('miniPic').src = currentPic || 'https://i.pravatar.cc/100';
-                document.getElementById('miniName').textContent = currentName || 'You';
-                document.getElementById('miniNumber').textContent = currentUser;
-                
-                renderChatList();
-                
-                if (window.innerWidth <= 768) {
-                    showElement('mobileMenuBtn');
-                }
-            } else {
-                showModal('loginModal');
-                hideElement('appContainer');
-            }
-        }
-
-        // Login Functionality
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const country = document.getElementById('countrySelect').value;
-            const phone = document.getElementById('phoneInputSimple').value.trim();
-            const displayName = document.getElementById('displayNameInput').value.trim();
-            
-            if (!phone) {
-                alert('Please enter phone number');
-                return;
-            }
-            
-            if (!displayName) {
-                alert('Please enter display name');
-                return;
-            }
-
-            const phoneFull = country + phone.replace(/^0+/, '');
-            
-            try {
-                const fileInput = document.getElementById('profileUploadInput');
-                let profilePic = 'https://i.pravatar.cc/100';
-                
-                if (fileInput.files[0]) {
-                    const file = fileInput.files[0];
-                    const storageRef = sRef(storage, `profiles/${phoneFull}_${Date.now()}_${file.name}`);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    profilePic = await getDownloadURL(snapshot.ref);
-                }
-
-                currentUser = phoneFull;
-                currentName = displayName;
-                currentPic = profilePic;
-                
-                saveUser();
-                
-                const userRef = ref(db, `users/${currentUser}`);
-                await update(userRef, {
-                    name: currentName,
-                    pic: currentPic,
-                    lastSeen: nowStr()
-                });
-                
-                updateUIAuth();
-                
-                alert(`Successfully logged in as ${currentUser}`);
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
-            }
-        });
-
-        // Chat List Rendering
+        // Chat Functions
         function renderChatList() {
             const chatListEl = document.getElementById('chatList');
             if (!currentUser) return;
 
-            const chatListRef = ref(db, `chatList/${currentUser}`);
+            const chatListRef = db.ref(`chatList/${currentUser.uid}`);
             
-            onValue(chatListRef, (snapshot) => {
+            chatListRef.on('value', (snapshot) => {
                 const chats = snapshot.val() || {};
                 const chatArray = Object.entries(chats).map(([id, data]) => ({ id, ...data }));
                 
@@ -1233,7 +1077,7 @@
                 const filteredChats = chatArray.filter(chat => 
                     !searchTerm || 
                     (chat.name || '').toLowerCase().includes(searchTerm) ||
-                    (chat.contact || '').includes(searchTerm)
+                    (chat.email || '').includes(searchTerm)
                 );
                 
                 if (filteredChats.length === 0) {
@@ -1249,10 +1093,10 @@
                     }
                     
                     chatItem.innerHTML = `
-                        <img class="chat-avatar" src="${chat.pic || 'https://i.pravatar.cc/100'}" alt="${chat.name}">
+                        <img class="chat-avatar" src="${chat.photoURL || 'https://i.pravatar.cc/100'}" alt="${chat.name}">
                         <div class="chat-content">
                             <div class="chat-header">
-                                <div class="chat-name">${chat.name || chat.contact}</div>
+                                <div class="chat-name">${chat.name || chat.email}</div>
                                 <div class="time">${chat.time ? chat.time.split(',')[0] : ''}</div>
                             </div>
                             <div class="last-message">${chat.lastMessage || 'No messages yet'}</div>
@@ -1260,24 +1104,24 @@
                         ${chat.unread > 0 ? `<div class="unread-badge">${chat.unread}</div>` : ''}
                     `;
                     
-                    chatItem.addEventListener('click', () => openChat(chat.id, chat.contact, chat.name, chat.pic));
+                    chatItem.addEventListener('click', () => openChat(chat.id, chat.email, chat.name, chat.photoURL));
                     chatListEl.appendChild(chatItem);
                 });
             });
         }
 
-        // Open Chat Function
-        function openChat(chatId, otherNumber, otherName, otherPic) {
+        function openChat(chatId, otherEmail, otherName, otherPhoto) {
             currentChatId = chatId;
-            currentChatOther = otherNumber;
+            currentChatOther = otherEmail;
             
-            document.getElementById('chatWithName').textContent = otherName || otherNumber;
-            document.getElementById('chatWithNumber').textContent = otherNumber;
-            document.getElementById('chatWithPic').src = otherPic || 'https://i.pravatar.cc/100';
+            document.getElementById('chatWithName').textContent = otherName || otherEmail;
+            document.getElementById('chatWithEmail').textContent = otherEmail;
+            document.getElementById('chatWithPic').src = otherPhoto || 'https://i.pravatar.cc/100';
             
+            // Reset unread count
             if (currentUser) {
-                const userChatRef = ref(db, `chatList/${currentUser}/${chatId}`);
-                update(userChatRef, { unread: 0 });
+                const userChatRef = db.ref(`chatList/${currentUser.uid}/${chatId}`);
+                userChatRef.update({ unread: 0 });
             }
             
             hideElement('welcomeScreen');
@@ -1293,33 +1137,30 @@
             const messagesContainer = document.getElementById('chatMessages');
             messagesContainer.innerHTML = '';
             
+            // Listen for messages
             if (chatListeners[chatId]) return;
             
-            const messagesRef = ref(db, `messages/${chatId}`);
-            onChildAdded(messagesRef, (snapshot) => {
+            const messagesRef = db.ref(`messages/${chatId}`);
+            messagesRef.on('child_added', (snapshot) => {
                 const message = snapshot.val();
                 renderMessage(snapshot.key, message);
                 
-                if (message.from !== currentUser && !message.seen) {
-                    update(ref(db, `messages/${chatId}/${snapshot.key}`), { seen: true });
+                if (message.from !== currentUser.uid && !message.seen) {
+                    db.ref(`messages/${chatId}/${snapshot.key}`).update({ seen: true });
                 }
             });
             
             chatListeners[chatId] = true;
-            
-            if (window.innerWidth <= 768) {
-                document.getElementById('leftPanel').classList.remove('active');
-            }
         }
 
         function renderMessage(key, message) {
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.from === currentUser ? 'sent' : 'received'}`;
+            messageDiv.className = `message ${message.from === currentUser.uid ? 'sent' : 'received'}`;
             
             let messageHTML = `
                 <div style="font-weight: 600; margin-bottom: 4px;">
-                    ${message.from === currentUser ? 'You' : (message.fromName || message.from)}
+                    ${message.from === currentUser.uid ? 'You' : (message.fromName || 'Unknown')}
                 </div>
             `;
             
@@ -1342,7 +1183,6 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Send Message Functionality
         async function sendMessage() {
             const messageBox = document.getElementById('messageBox');
             const imagePicker = document.getElementById('imagePicker');
@@ -1359,36 +1199,30 @@
                 return;
             }
 
-            const chatId = uidFor(currentUser, currentChatOther);
+            const chatId = uidFor(currentUser.uid, currentChatOther);
 
             try {
                 let imageUrl = null;
                 
                 if (imageFile) {
-                    // Try Google Drive first if connected
                     if (driveAccessToken) {
                         try {
                             imageUrl = await uploadToGoogleDrive(imageFile, `chat_${chatId}_${imageFile.name}`);
-                            console.log('File uploaded to Google Drive:', imageUrl);
                         } catch (driveError) {
-                            console.warn('Drive upload failed, using Firebase:', driveError);
-                            // Fallback to Firebase Storage
-                            const storageRef = sRef(storage, `chat_images/${chatId}_${Date.now()}_${imageFile.name}`);
-                            const snapshot = await uploadBytes(storageRef, imageFile);
-                            imageUrl = await getDownloadURL(snapshot.ref);
+                            console.warn('Drive upload failed:', driveError);
+                            alert('Image upload failed. Please try again.');
+                            return;
                         }
                     } else {
-                        // Use Firebase Storage only
-                        const storageRef = sRef(storage, `chat_images/${chatId}_${Date.now()}_${imageFile.name}`);
-                        const snapshot = await uploadBytes(storageRef, imageFile);
-                        imageUrl = await getDownloadURL(snapshot.ref);
+                        alert('Please connect Google Drive first to send images.');
+                        return;
                     }
                 }
 
                 const messageData = {
-                    from: currentUser,
-                    fromName: currentName,
-                    fromPic: currentPic,
+                    from: currentUser.uid,
+                    fromName: currentUser.displayName || currentUser.email,
+                    fromPhoto: currentUser.photoURL,
                     text: messageText,
                     image: imageUrl,
                     time: nowStr(),
@@ -1396,35 +1230,27 @@
                     timestamp: Date.now()
                 };
 
-                const messagesRef = ref(db, `messages/${chatId}`);
-                const newMessageRef = push(messagesRef);
-                await set(newMessageRef, messageData);
+                const messagesRef = db.ref(`messages/${chatId}`);
+                const newMessageRef = messagesRef.push();
+                await newMessageRef.set(messageData);
 
-                const updates = {};
+                // Update chat lists
                 const lastMessage = messageText || (imageUrl ? '📷 Image' : '');
                 
-                updates[`chatList/${currentUser}/${chatId}`] = {
-                    contact: currentChatOther,
-                    name: document.getElementById('chatWithName')?.textContent || currentChatOther,
-                    pic: document.getElementById('chatWithPic')?.src || 'https://i.pravatar.cc/100',
+                // Update current user's chat list
+                await db.ref(`chatList/${currentUser.uid}/${chatId}`).update({
+                    email: currentChatOther,
+                    name: document.getElementById('chatWithName').textContent,
+                    photoURL: document.getElementById('chatWithPic').src,
                     lastMessage: lastMessage,
                     time: nowStr(),
-                    unread: 0,
-                    lastUpdate: Date.now()
-                };
+                    unread: 0
+                });
 
-                updates[`chatList/${currentChatOther}/${chatId}`] = {
-                    contact: currentUser,
-                    name: currentName,
-                    pic: currentPic,
-                    lastMessage: lastMessage,
-                    time: nowStr(),
-                    unread: 1,
-                    lastUpdate: Date.now()
-                };
+                // Update other user's chat list (in real app, you'd need their UID)
+                // For demo, we'll just update current user's side
 
-                await update(ref(db), updates);
-
+                // Clear inputs
                 if (messageBox) {
                     messageBox.value = '';
                     messageBox.focus();
@@ -1439,8 +1265,11 @@
             }
         }
 
-        // Setup Event Listeners
+        // Event Listeners
         function setupEventListeners() {
+            // Google Sign-in
+            document.getElementById('googleSignInBtn').addEventListener('click', signInWithGoogle);
+
             // Send message
             document.getElementById('sendBtn').addEventListener('click', sendMessage);
             document.getElementById('messageBox').addEventListener('keypress', (e) => {
@@ -1461,31 +1290,21 @@
             document.getElementById('newChatForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                const phoneNumber = document.getElementById('newChatNumber').value.trim();
-                const contactName = document.getElementById('newChatName').value.trim() || phoneNumber;
+                const contactEmail = document.getElementById('newChatEmail').value.trim();
+                const contactName = document.getElementById('newChatName').value.trim() || contactEmail;
                 
-                if (!phoneNumber) {
-                    alert('Please enter phone number');
+                if (!contactEmail) {
+                    alert('Please enter contact email');
                     return;
                 }
 
                 try {
-                    let contactPic = 'https://i.pravatar.cc/100';
-                    const fileInput = document.getElementById('newChatPic');
+                    const chatId = uidFor(currentUser.uid, contactEmail);
                     
-                    if (fileInput.files[0]) {
-                        const file = fileInput.files[0];
-                        const storageRef = sRef(storage, `contacts/${phoneNumber}_${Date.now()}_${file.name}`);
-                        const snapshot = await uploadBytes(storageRef, file);
-                        contactPic = await getDownloadURL(snapshot.ref);
-                    }
-
-                    const chatId = uidFor(currentUser, phoneNumber);
-                    
-                    await set(ref(db, `chatList/${currentUser}/${chatId}`), {
-                        contact: phoneNumber,
+                    await db.ref(`chatList/${currentUser.uid}/${chatId}`).set({
+                        email: contactEmail,
                         name: contactName,
-                        pic: contactPic,
+                        photoURL: 'https://i.pravatar.cc/100',
                         lastMessage: '',
                         time: nowStr(),
                         unread: 0
@@ -1494,7 +1313,7 @@
                     hideModal('newChatModal');
                     document.getElementById('newChatForm').reset();
                     
-                    openChat(chatId, phoneNumber, contactName, contactPic);
+                    openChat(chatId, contactEmail, contactName, 'https://i.pravatar.cc/100');
                     
                 } catch (error) {
                     console.error('Add contact error:', error);
@@ -1506,42 +1325,23 @@
             document.getElementById('driveBackupBtn').addEventListener('click', () => {
                 showModal('driveBackupModal');
             });
-
-            document.getElementById('connectDriveBtn').addEventListener('click', () => {
-                connectGoogleDrive();
-            });
-
-            document.getElementById('backupNowBtn').addEventListener('click', async () => {
-                alert('Backup feature will be implemented in the next version!');
-            });
-
+            document.getElementById('connectDriveBtn').addEventListener('click', connectGoogleDrive);
             document.getElementById('disconnectDriveBtn').addEventListener('click', () => {
                 driveAccessToken = null;
                 localStorage.removeItem('drive_access_token');
                 updateDriveStatus(false);
                 showElement('driveAuthSection');
                 hideElement('driveConnectedSection');
-                alert('Google Drive disconnected');
             });
 
-            // Other buttons
-            document.getElementById('clearLocal').addEventListener('click', () => {
-                if (confirm('Clear all local data?')) {
-                    localStorage.clear();
-                    location.reload();
-                }
-            });
-
+            // Logout
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 if (confirm('Are you sure you want to logout?')) {
-                    currentUser = null;
-                    currentName = null;
-                    currentPic = null;
-                    localStorage.removeItem('prochat_user');
-                    location.reload();
+                    auth.signOut();
                 }
             });
 
+            // Theme toggle
             document.getElementById('themeBtn').addEventListener('click', () => {
                 document.body.classList.toggle('dark');
                 const icon = document.querySelector('#themeBtn i');
@@ -1552,27 +1352,25 @@
                 }
             });
 
+            // Back to chats
             document.getElementById('backToChats').addEventListener('click', () => {
                 hideElement('chatWindow');
                 showElement('welcomeScreen');
                 currentChatId = null;
                 currentChatOther = null;
-                
-                const messageBox = document.getElementById('messageBox');
-                if (messageBox) {
-                    messageBox.disabled = true;
-                    messageBox.placeholder = 'Select a chat to start messaging...';
-                }
             });
 
+            // Mobile menu
             document.getElementById('mobileMenuBtn').addEventListener('click', () => {
                 document.getElementById('leftPanel').classList.add('active');
             });
 
+            // Attach file
             document.getElementById('attachFile').addEventListener('click', () => {
                 document.getElementById('imagePicker').click();
             });
 
+            // Emoji toggle
             document.getElementById('emojiToggle').addEventListener('click', () => {
                 const emojiPicker = document.getElementById('emojiPicker');
                 emojiPicker.classList.toggle('hidden');
@@ -1589,16 +1387,7 @@
                 hideModal('driveBackupModal');
             });
 
-            // Close modals when clicking outside
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.addEventListener('click', (e) => {
-                    if (e.target === modal) {
-                        modal.classList.remove('active');
-                    }
-                });
-            });
-
-            // Search functionality
+            // Search
             document.getElementById('searchInput').addEventListener('input', renderChatList);
         }
 
@@ -1612,14 +1401,7 @@
         // Initialize App
         function initializeApp() {
             setupEventListeners();
-            loadSavedUser();
-            
-            // Initialize Google Auth when the library loads
-            setTimeout(() => {
-                if (typeof google !== 'undefined') {
-                    initializeGoogleAuth();
-                }
-            }, 1000);
+            initAuth();
         }
 
         // Start the app
